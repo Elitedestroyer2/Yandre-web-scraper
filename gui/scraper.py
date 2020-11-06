@@ -12,7 +12,7 @@ myPath = 'CharactersForRec'
 
 
 
-def grab_pictures(lewdFilter, wholesomeFilter, duplicateFilter, searchText):
+def grab_pictures(lewdFilter, wholesomeFilter, duplicateFilter, searchInput):
     pageCounter = 1
     url = f"https://yande.re/tag?name=&order=count&page={pageCounter}&type=4"
     characters = []
@@ -74,6 +74,16 @@ def grab_pictures(lewdFilter, wholesomeFilter, duplicateFilter, searchText):
                     file_count = len(next(os.walk(folderPath))[2]) + 1
                 if file_count > MAX_PICTURES:
                     break
+
+def searchSuggest(input):
+    suggested_characters = []
+    searchUrl = f'https://yande.re/tag?name={input}&type=4&order=count'
+    characters = grabCharacter(searchUrl)[1]
+    for character in characters:
+        suggested_characters.append(character.name)
+        if len(suggested_characters) == 10:
+            break
+    return suggested_characters
 
 def toggleToBool(toggleString):
     if toggleString == 'down':
@@ -137,15 +147,9 @@ def grabCharacter(url):
     numbers = []
     done = False
 
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    results = soup.findAll('td', class_='tag-type-character')
-    resultsForNumbers = soup.findAll('td', align ='right')
-    for result in resultsForNumbers:
-        numbers.append(result.contents[0])
-    
+    resultsForCharacters, numbers = pageResults(url)
 
-    for result, number in zip(results, numbers):
+    for result, number in zip(resultsForCharacters, numbers):
         #Grabs characters names from the list page and puts them in a list
         if int(number) < MIN_PICTURES:
             done = True
@@ -157,8 +161,22 @@ def grabCharacter(url):
             characters.append(Character(characterName, mainURL + characterUrl, number))
     return done, characters
 
+def pageResults(url):
+    numbers = []
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    resultsForCharacters = soup.findAll('td', class_='tag-type-character')
+    resultsForNumbers = soup.findAll('td', align ='right')
+    for result in resultsForNumbers:
+        numbers.append(result.contents[0])
+    return resultsForCharacters, numbers
+    
+
 class Character:
     def __init__(self, name, url, count):
         self.name = name
         self.url = url
         self.count = count
+
+#grab_pictures('normal','normal','normal')
+#searchSuggest('m')
