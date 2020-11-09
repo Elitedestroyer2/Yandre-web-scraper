@@ -90,14 +90,13 @@
     # Draw a background to indicate selection
     canvas.before:
         Color:
-            rgba: (.0, 0.9, .1, .3) if self.selected else (0, 0, 0, 1)
+            rgba: (.0, 0, 0, 1)
         Rectangle:
             pos: self.pos
             size: self.size
 <RV>:
     size_hint: .2, None
     viewclass: 'SelectableLabel'
-    height: 1
     SelectableRecycleBoxLayout:
         default_size: None, dp(22)
         default_size_hint: 1, None
@@ -117,10 +116,9 @@
                 pos: self.pos
                 size: self.size
                 source: 'Images/3.jpg'
-        #Move to top somehow
         GridLayout:
             cols:3
-            size_hint: .95, .95
+            size_hint: .8, .85
             height: self.minimum_height
             padding: 10, 10
             canvas.before:
@@ -139,7 +137,7 @@
                 text: 'Search'
             Blank:
             TabLabel:
-                text: 'Amount:'
+                text: 'Amount'
             CharacterTextInput:
                 id: search_box
             Blank:
@@ -151,10 +149,10 @@
             Blank:
             Blank:
             TabLabel:
-                text: 'Filters:'
+                text: 'Filters'
             Blank:
             TabLabel:
-                text: 'Extras:'
+                text: 'Extras'
             ToggleButton:
                 text: 'Lewd Only'
                 group: 'filters'
@@ -174,7 +172,7 @@
             Blank:
             TabLabel:
                 text: 'Controls'
-            Button:
+            SaveDirButton:
                 text: 'Save directory'
             Blank:
             Button:

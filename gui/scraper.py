@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import os
 import urllib.request
 import cv2
+from configparser import ConfigParser
 
 
 MAX_PICTURES = 60
@@ -74,6 +75,38 @@ def grab_pictures(lewdFilter, wholesomeFilter, duplicateFilter, searchInput):
                     file_count = len(next(os.walk(folderPath))[2]) + 1
                 if file_count > MAX_PICTURES:
                     break
+
+def add_character(character):
+
+
+
+def start_up():
+    if not os.path.isfile('settings.ini'):
+        write_settings()
+    if os.path.isfile('settings.ini'):
+        read_settings()
+
+def write_settings():
+    config = ConfigParser()
+    config.add_section('Configuartion')
+    config.set('Configuartion', 'Save_Directory', '')
+    with open('settings.ini', 'w') as configfile:
+        config.write(configfile)
+
+def read_settings():
+    config = ConfigParser()
+    config.read('settings.ini')
+    myPath = config.get('Configuartion', 'Save_Directory')
+
+def set_path(path):
+    myPath = path
+    #update config
+    config = ConfigParser()
+    config.read('settings.ini')
+    config.set('Configuartion', 'Save_Directory', path)
+    #Save new path
+    with open('settings.ini', 'w') as configfile:
+        config.write(configfile)
 
 def searchSuggest(input):
     suggested_characters = []
@@ -178,5 +211,11 @@ class Character:
         self.url = url
         self.count = count
 
+
+
 #grab_pictures('normal','normal','normal')
 #searchSuggest('m')
+
+
+
+####need to expand character class and implament the 'add character' function
