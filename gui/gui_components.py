@@ -9,10 +9,12 @@ from kivy.properties import BooleanProperty
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.app import App
 
+from kivy.uix.modalview import ModalView
+
 import tkinter as tk
 from tkinter import filedialog
 
-from scraper import grab_pictures, searchSuggest, set_path
+from scraper import grab_pictures, searchSuggest, set_path, return_characters
 
 class Blank(Label):
     pass
@@ -49,6 +51,7 @@ class CharacterTextInput(TextInput):
                 CharacterTextInput.move_cursor_right(self)
             else:
                 self.do_backspace()
+                return
         if keycode[1] == 'left':
             CharacterTextInput.move_cursor_left(self)
             return
@@ -71,6 +74,9 @@ class CharacterTextInput(TextInput):
             # update and referesh suggestions_dropdown
             App.get_running_app().root.ids.suggestions_dropdown.data = suggestions_data
             App.get_running_app().root.ids.suggestions_dropdown.refresh_from_data()
+            #clear lists
+            suggestions.clear()
+            suggestions_data.clear()
             # Unhide suggestions_dropdown
             hide_widget(App.get_running_app().root.ids.suggestions_dropdown, False)
         else:
@@ -108,17 +114,18 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def refresh_view_attrs(self, rv, index, data):
         ''' Catch and handle the view changes '''
         self.index = index
-        return super(SelectableLabel, self).refresh_view_attrs(
-            rv, index, data)
+        return super(SelectableLabel, self).refresh_view_attrs(rv, index, data)
 
     def on_touch_down(self, touch):
         ''' Add selection on touch down '''
         if super(SelectableLabel, self).on_touch_down(touch):
             return True
         if self.collide_point(*touch.pos) and self.selectable:
-            App.get_running_app().root.ids.search_box.text = App.get_running_app().root.ids.suggestions_dropdown.data[self.index]['text']
-            hide_widget(App.get_running_app().root.ids.suggestions_dropdown)
-            return self.parent.select_with_touch(self.index, touch)
+            if not isinstance(App.get_running_app().root_window.children[0], ModalView):
+                App.get_running_app().root.ids.search_box.text = App.get_running_app().root.ids.suggestions_dropdown.data[self.index]['text']
+                hide_widget(App.get_running_app().root.ids.suggestions_dropdown)
+            else:
+                return self.parent.select_with_touch(self.index, touch)
 
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
@@ -129,6 +136,15 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         else:
             pass
 
+class CharacterModalView(ModalView):
+    def get_characters(self):
+        characterList = []
+        characters = return_characters()
+        for character in characters:
+            characterList.append({'text': str(character.name)})
+        self.ids.character_list.data = characterList
+        self.ids.character_list.refresh_from_data()
+        hide_widget(self.ids.character_list, False)
 
 def hide_widget(wid, dohide=True):
     if hasattr(wid, 'saved_attrs'):

@@ -1,4 +1,6 @@
 
+#:import Factory kivy.factory.Factory
+
 #:set Alabaster 247/255, 247/255, 247/255, 1
 #:set Mercury 225/255, 225/255, 225/255, 1
 #:set Alto 207/255, 207/255, 207/255, 1
@@ -21,7 +23,7 @@
 
 <Button>:
     size_hint: 1,None
-    height: 30
+    height: 35
     valign: 'center'
     padding_y: 10
     background_color: Silver_Chalice_Dark
@@ -34,6 +36,7 @@
     text_size: self.size
     halign: 'center'
     valign: 'center'
+    font_size: '16sp'
 
 <TextInput>:
     size_hint: 1, None
@@ -46,6 +49,7 @@
     foreground_color: Mercury
     cursor_color: Mine_Shaft
     cursor_width: '2sp'
+    font_size: '16sp'
 
 <Blank>:
     size_hint: .1, None
@@ -90,22 +94,44 @@
     # Draw a background to indicate selection
     canvas.before:
         Color:
-            rgba: (.0, 0, 0, 1)
+            rgba: (.0, .6, .4, 1) if self.selected else (0, 0, 0, 1)
         Rectangle:
             pos: self.pos
             size: self.size
+
+<SelectableRecycleBoxLayout>:
+    size_hint: 1, None
+    default_size: None, dp(32)
+    default_size_hint: 1, None
+    height: self.minimum_height
+    orientation: 'vertical'
+    multiselect: True
+    touch_multiselect: True
+
 <RV>:
-    size_hint: .2, None
     viewclass: 'SelectableLabel'
     SelectableRecycleBoxLayout:
-        default_size: None, dp(22)
-        default_size_hint: 1, None
-        size_hint_y: None
-        height: self.minimum_height
-        width: 20
+
+<CharacterModalView@ModalView>:
+    size_hint: 1,1
+    auto_dismiss: False
+    on_pre_open: root.get_characters()
+    background: 'Images/3.jpg'
+
+    BoxLayout:
         orientation: 'vertical'
-        multiselect: False
-        touch_multiselect: False
+        RV:
+            id: character_list
+            size_hint: 1, 1
+            
+        BoxLayout:
+            size_hint: 1, .05
+            orientation: 'horizontal'
+            Button: 
+                text: 'close'
+                on_release: root.dismiss()
+            Button:
+                text: 'remove'
 
 <Launch>:
     AnchorLayout:
@@ -144,6 +170,7 @@
             TextInput:
                 hint_text: "100"
                 input_filter: 'int'
+                id: amount
             RV:
                 id: suggestions_dropdown
             Blank:
@@ -177,8 +204,10 @@
             Blank:
             Button:
                 text: 'Add character'
+                on_press: root.add(root.ids.search_box.text, root.ids.amount.text)
             Button:
                 text: 'Show added characters'
+                on_release: Factory.CharacterModalView().open()
             Blank:
             Button:
                 text: 'Start download'

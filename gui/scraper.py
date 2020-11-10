@@ -76,8 +76,11 @@ def grab_pictures(lewdFilter, wholesomeFilter, duplicateFilter, searchInput):
                 if file_count > MAX_PICTURES:
                     break
 
-def add_character(character):
+def return_characters():
+    return characters
 
+def add_character(characterName, amount):
+    characters.append(Character(characterName, amount = amount))
 
 
 def start_up():
@@ -111,11 +114,12 @@ def set_path(path):
 def searchSuggest(input):
     suggested_characters = []
     searchUrl = f'https://yande.re/tag?name={input}&type=4&order=count'
-    characters = grabCharacter(searchUrl)[1]
-    for character in characters:
+    grabed_characters = grabCharacter(searchUrl)[1]
+    for character in grabed_characters:
         suggested_characters.append(character.name)
         if len(suggested_characters) == 10:
             break
+    grabed_characters.clear()
     return suggested_characters
 
 def toggleToBool(toggleString):
@@ -175,6 +179,9 @@ def getPage(character):
     job_elems = results.find_all('a', class_='thumb')
     return job_elems, file_count, folderPath
 
+
+
+###used for no character added
 def grabCharacter(url):
     characters = []
     numbers = []
@@ -206,16 +213,14 @@ def pageResults(url):
     
 
 class Character:
-    def __init__(self, name, url, count):
+    def __init__(self, name, url = None, count = None, amount = 20):
         self.name = name
         self.url = url
         self.count = count
+        self.amount = amount
 
 
 
 #grab_pictures('normal','normal','normal')
 #searchSuggest('m')
 
-
-
-####need to expand character class and implament the 'add character' function
