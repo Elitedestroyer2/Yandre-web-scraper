@@ -138,8 +138,8 @@ class CharacterModalView(ModalView):
         self.characterList = []
         characters = return_characters()
         for character in characters:
-            characterList.append({'text': character[0]})
-        self.ids.character_list.data = characterList
+            self.characterList.append({'text': character[0]})
+        self.ids.character_list.data = self.characterList
         self.ids.character_list.refresh_from_data()
         hide_widget(self.ids.character_list, False)
     
