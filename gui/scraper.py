@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 import os
 import urllib.request
 import cv2
+
+import databasecomm
+
 from configparser import ConfigParser
 
 
@@ -77,10 +80,16 @@ def grab_pictures(lewdFilter, wholesomeFilter, duplicateFilter, searchInput):
                     break
 
 def return_characters():
-    return characters
+    conn = databasecomm.Connection()
+    return conn.get_characters_names()
 
 def add_character(characterName, amount):
-    characters.append(Character(characterName, amount = amount))
+    character = (Character(characterName, amount = amount))
+    conn = databasecomm.Connection()
+    if not conn.check_character_exsits([character.name]):
+        conn.enter_new_character([character.name, character.url, character.count, character.amount])
+    else:
+        conn.update_character_amount([character.amount, character.name])
 
 
 def start_up():
@@ -180,8 +189,6 @@ def getPage(character):
     return job_elems, file_count, folderPath
 
 
-
-###used for no character added
 def grabCharacter(url):
     characters = []
     numbers = []
@@ -213,14 +220,10 @@ def pageResults(url):
     
 
 class Character:
-    def __init__(self, name, url = None, count = None, amount = 20):
+    def __init__(self, name, url = '', count = 0, amount = 20):
         self.name = name
         self.url = url
         self.count = count
         self.amount = amount
 
-
-
-#grab_pictures('normal','normal','normal')
-#searchSuggest('m')
 

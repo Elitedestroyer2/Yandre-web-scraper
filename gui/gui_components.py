@@ -82,9 +82,6 @@ class CharacterTextInput(TextInput):
         else:
             pass
 
-            # index search may speed up the time of this action
-            # maybe Pandas HDF5
-
 
 class RV(RecycleView):
     def __init__(self, **kwargs):
@@ -138,13 +135,16 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 
 class CharacterModalView(ModalView):
     def get_characters(self):
-        characterList = []
+        self.characterList = []
         characters = return_characters()
         for character in characters:
-            characterList.append({'text': str(character.name)})
+            characterList.append({'text': character[0]})
         self.ids.character_list.data = characterList
         self.ids.character_list.refresh_from_data()
         hide_widget(self.ids.character_list, False)
+    
+    def remove_character(self):
+        pass
 
 def hide_widget(wid, dohide=True):
     if hasattr(wid, 'saved_attrs'):

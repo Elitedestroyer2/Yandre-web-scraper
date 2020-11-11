@@ -15,9 +15,12 @@ class Launch(FloatLayout):
         grab_pictures(lewd, wholesome, duplicate, search)
     
     def add(self, characterName, amount):
-        add_character(characterName, amount)
-        App.get_running_app().root.ids.search_box.text = ''
-        App.get_running_app().root.ids.amount.text = ''
+        if characterName:
+            add_character(characterName, amount)
+            App.get_running_app().root.ids.search_box.text = ''
+            App.get_running_app().root.ids.amount.text = ''
+        else:
+            pass
 
 
 class ScraperApp(App):
@@ -27,6 +30,3 @@ class ScraperApp(App):
 
 if __name__ == '__main__':
     ScraperApp().run()
-
-
-###implament Json storing for character Data and make access funtions for needed information
