@@ -109,8 +109,6 @@
     touch_multiselect: True
 
 <RV>:
-    viewclass: 'SelectableLabel'
-    SelectableRecycleBoxLayout:
 
 <CharacterModalView@ModalView>:
     size_hint: 1,1
@@ -123,7 +121,29 @@
         RV:
             id: character_list
             size_hint: 1, 1
+            viewclass: 'AddedCharacterSelect'
+            SelectableRecycleBoxLayout:
             
+        BoxLayout:
+            size_hint: 1, .05
+            orientation: 'horizontal'
+            Button: 
+                text: 'close'
+                on_release: root.dismiss()
+            Button:
+                text: 'remove'
+
+<CollectionModalView@ModalView>:
+    size_hint: 1,1
+    auto_dismiss: False
+    on_pre_open: root.get_characters()
+    background: 'Images/3.jpg'
+
+    BoxLayout:
+        orientation: 'vertical'
+        RV:
+            id: collection_list
+            size_hint: 1, 1
         BoxLayout:
             size_hint: 1, .05
             orientation: 'horizontal'
@@ -173,6 +193,8 @@
                 id: amount
             RV:
                 id: suggestions_dropdown
+                viewclass: 'CharacterSelect'
+                SelectableRecycleBoxLayout:
             Blank:
             Blank:
             TabLabel:
@@ -211,3 +233,5 @@
             Blank:
             Button:
                 text: 'Start download'
+            Button:
+                text: 'Show collection'

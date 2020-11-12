@@ -14,7 +14,10 @@ from kivy.uix.modalview import ModalView
 import tkinter as tk
 from tkinter import filedialog
 
-from scraper import grab_pictures, searchSuggest, set_path, return_characters
+import scraper
+from scraper import searchSuggest
+from settings import set_path
+from charactermanager import return_characters
 
 class Blank(Label):
     pass
@@ -22,65 +25,90 @@ class TabLabel(Label):
     pass
 class SaveDirButton(Button):
     def on_press(self):
-        SaveDirButton.get_path(self)
+        self.get_path()
 
-
-    @staticmethod
     def get_path(self):
         root = tk.Tk()
         root.withdraw()
-
-        set_path((filedialog.askdirectory()))
+        directory = filedialog.askdirectory()
+        if directory:
+            set_path(directory)
+        else:
+            pass
 
 class CharacterTextInput(TextInput):
 
-    #Used to visually fix Kivy cursor posistion bug after .do_backspace() is used.
+    def keyboard_on_key_down(self, instance, keycode, text, modifiers):
+        self.suggestions_data = []
+        if keycode[1] == 'backspace':
+            self.backspace()
+        if keycode[1] == 'left':
+            self.move_cursor_left(self)
+            return
+        if keycode[1] == 'right':
+            self.move_cursor_right(self)
+            return
+        if self.check_length(keycode):
+            suggestions = self.get_suggestions(keycode)
+            self.update_suggestion_data(suggestions)
+        elif not self.check_length(keycode):
+            self.hide_drop_down()
+        else:
+            pass
+
+
+    def update_suggestion_data(self, suggestions):
+        if len(suggestions) == 0:
+            self.hide_drop_down()
+        else:
+            #change suggestions into proper format for the suggestions_dropdown
+            for suggestion in suggestions:
+                self.suggestions_data.append({'text': str(suggestion)})
+            self.update_suggestions()
+            self.suggestions_data.clear()
+            self.show_drop_down()
+
+    def update_suggestions(self):
+        # update and referesh suggestions_dropdown
+        App.get_running_app().root.ids.suggestions_dropdown.data = self.suggestions_data
+        App.get_running_app().root.ids.suggestions_dropdown.refresh_from_data()
+    
+    def hide_drop_down(self):
+        hide_widget(App.get_running_app().root.ids.suggestions_dropdown)
+    
+    def show_drop_down(self):
+        hide_widget(App.get_running_app().root.ids.suggestions_dropdown, False)
+
     def move_cursor_left(self):
         self.do_cursor_movement(action = 'cursor_left')
+
     def move_cursor_right(self):
         self.do_cursor_movement(action = 'cursor_right')
 
-    def keyboard_on_key_down(self, instance, keycode, text, modifiers):
-        suggestions = []
-        suggestions_data = []
-        if keycode[1] == 'backspace':
-            if self.selection_text != '':
-                self.delete_selection()
-                #Fixes visual cursor posistion bug
-                CharacterTextInput.move_cursor_left(self)
-                CharacterTextInput.move_cursor_right(self)
-            else:
-                self.do_backspace()
-                return
-        if keycode[1] == 'left':
-            CharacterTextInput.move_cursor_left(self)
-            return
-        if keycode[1] == 'right':
-            CharacterTextInput.move_cursor_right(self)
-            return
-        if len(self.text) <= 3:
-            hide_widget(App.get_running_app().root.ids.suggestions_dropdown)
-        if len(self.text + keycode[1]) >= 3 or len(self.text) >= 3:
-            if keycode[1] == 'backspace':
-                suggestions = searchSuggest(self.text)
-            else:
-                suggestions = searchSuggest(self.text + keycode[1])
-            if len(suggestions) == 0:
-                suggestions_data.append({'text': 'No suggestions'})
-            else:
-                # change suggestions into proper format for the suggestions_dropdown
-                for suggestion in suggestions:
-                    suggestions_data.append({'text': str(suggestion)})
-            # update and referesh suggestions_dropdown
-            App.get_running_app().root.ids.suggestions_dropdown.data = suggestions_data
-            App.get_running_app().root.ids.suggestions_dropdown.refresh_from_data()
-            #clear lists
-            suggestions.clear()
-            suggestions_data.clear()
-            # Unhide suggestions_dropdown
-            hide_widget(App.get_running_app().root.ids.suggestions_dropdown, False)
+    def check_length(self, keycode):
+        if len(self.text) >= 3:
+            return True
+        elif len(self.text + keycode[1]) >= 3 and keycode[1] != 'backspace':
+            return True
         else:
-            pass
+            False
+
+    def backspace(self):
+        if self.selection_text != '':
+            self.delete_selection()
+            #Fixes visual cursor posistion bug
+            CharacterTextInput.move_cursor_left(self)
+            CharacterTextInput.move_cursor_right(self)
+        else:
+            self.do_backspace()
+    
+    def get_suggestions(self, keycode):
+        if keycode[1] == 'backspace':
+            suggestions = searchSuggest(self.text)
+        else:
+            suggestions = searchSuggest(self.text + keycode[1])
+        return suggestions
+
 
 
 class RV(RecycleView):
@@ -118,27 +146,43 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         if super(SelectableLabel, self).on_touch_down(touch):
             return True
         if self.collide_point(*touch.pos) and self.selectable:
-            if not isinstance(App.get_running_app().root_window.children[0], ModalView):
-                App.get_running_app().root.ids.search_box.text = App.get_running_app().root.ids.suggestions_dropdown.data[self.index]['text']
-                hide_widget(App.get_running_app().root.ids.suggestions_dropdown)
-            else:
-                return self.parent.select_with_touch(self.index, touch)
+            return self.parent.select_with_touch(self.index, touch)
 
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
         if is_selected:
             pass
-            # deselect? In other words, reset function
         else:
             pass
+
+class CharacterSelect(SelectableLabel):
+    def on_touch_down(self, touch):
+        ''' Add selection on touch down '''
+        if super(SelectableLabel, self).on_touch_down(touch):
+            return True
+        if self.collide_point(*touch.pos) and self.selectable:
+            if not App.get_running_app().root.ids.suggestions_dropdown.data[self.index]['text'] == 'No Suggestions':
+                App.get_running_app().root.ids.search_box.text = App.get_running_app().root.ids.suggestions_dropdown.data[self.index]['text']
+            hide_widget(App.get_running_app().root.ids.suggestions_dropdown)
+
+class AddedCharacterSelect(SelectableLabel):
+    def apply_selection(self, rv, index, is_selected):
+        ''' Respond to the selection of items in the view. '''
+        self.selected = is_selected
+        if is_selected:
+            pass
+        else:
+            pass
+
 
 class CharacterModalView(ModalView):
     def get_characters(self):
         self.characterList = []
-        characters = return_characters()
-        for character in characters:
-            self.characterList.append({'text': character[0]})
+        characters = return_characters('characters')
+        if characters:
+            for character in characters:
+                self.characterList.append({'text': character[0]})
         self.ids.character_list.data = self.characterList
         self.ids.character_list.refresh_from_data()
         hide_widget(self.ids.character_list, False)

@@ -4,10 +4,6 @@ import os
 import urllib.request
 import cv2
 
-import databasecomm
-
-from configparser import ConfigParser
-
 
 MAX_PICTURES = 60
 MIN_PICTURES = 800
@@ -78,47 +74,6 @@ def grab_pictures(lewdFilter, wholesomeFilter, duplicateFilter, searchInput):
                     file_count = len(next(os.walk(folderPath))[2]) + 1
                 if file_count > MAX_PICTURES:
                     break
-
-def return_characters():
-    conn = databasecomm.Connection()
-    return conn.get_characters_names()
-
-def add_character(characterName, amount):
-    character = (Character(characterName, amount = amount))
-    conn = databasecomm.Connection()
-    if not conn.check_character_exsits([character.name]):
-        conn.enter_new_character([character.name, character.url, character.count, character.amount])
-    else:
-        conn.update_character_amount([character.amount, character.name])
-
-
-def start_up():
-    if not os.path.isfile('settings.ini'):
-        write_settings()
-    if os.path.isfile('settings.ini'):
-        read_settings()
-
-def write_settings():
-    config = ConfigParser()
-    config.add_section('Configuartion')
-    config.set('Configuartion', 'Save_Directory', '')
-    with open('settings.ini', 'w') as configfile:
-        config.write(configfile)
-
-def read_settings():
-    config = ConfigParser()
-    config.read('settings.ini')
-    myPath = config.get('Configuartion', 'Save_Directory')
-
-def set_path(path):
-    myPath = path
-    #update config
-    config = ConfigParser()
-    config.read('settings.ini')
-    config.set('Configuartion', 'Save_Directory', path)
-    #Save new path
-    with open('settings.ini', 'w') as configfile:
-        config.write(configfile)
 
 def searchSuggest(input):
     suggested_characters = []
