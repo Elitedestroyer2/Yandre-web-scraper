@@ -1,5 +1,7 @@
+#:kivy 1.11.1
 
 #:import Factory kivy.factory.Factory
+#:import gui_comp gui.gui_components.CharacterModalView
 
 #:set Alabaster 247/255, 247/255, 247/255, 1
 #:set Mercury 225/255, 225/255, 225/255, 1
@@ -27,7 +29,7 @@
     valign: 'center'
     padding_y: 10
     background_color: Silver_Chalice_Dark
-    background_down: 'atlas://images/myatlas/button-down'
+    background_down: 'atlas://gui/images/myatlas/button-down'
 
 <Label>:
     size_hint: .3, None
@@ -113,8 +115,9 @@
 <CharacterModalView@ModalView>:
     size_hint: 1,1
     auto_dismiss: False
-    on_pre_open: root.get_characters()
-    background: 'Images/3.jpg'
+    on_pre_open: root.start_up()
+    background: 'gui/Images/3.jpg'
+    id: mv
 
     BoxLayout:
         orientation: 'vertical'
@@ -132,12 +135,13 @@
                 on_release: root.dismiss()
             Button:
                 text: 'remove'
+                on_release: gui_comp.remove_character_button(mv)
 
 <CollectionModalView@ModalView>:
     size_hint: 1,1
     auto_dismiss: False
     on_pre_open: root.get_characters()
-    background: 'Images/3.jpg'
+    background: 'gui/Images/3.jpg'
 
     BoxLayout:
         orientation: 'vertical'
@@ -161,7 +165,7 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-                source: 'Images/3.jpg'
+                source: 'gui/Images/3.jpg'
         GridLayout:
             cols:3
             size_hint: .8, .85
@@ -204,12 +208,15 @@
                 text: 'Extras'
             ToggleButton:
                 text: 'Lewd Only'
+                id: lewd
                 group: 'filters'
             Blank:
             ToggleButton:
                 text: 'Duplication Check'
+                id: duplication
             ToggleButton:
                 text: 'Wholesome Only'
+                id: wholesome
                 group: 'filters'
             Blank:
             Blank:
@@ -233,5 +240,10 @@
             Blank:
             Button:
                 text: 'Start download'
+                on_press: root.send(root.ids.lewd.state, root.ids.wholesome.state, root.ids.duplication.state, root.ids.amount.text)
             Button:
                 text: 'Show collection'
+            Blank:
+            Blank:
+            Button:
+                text: 'Update collection'

@@ -1,7 +1,13 @@
 settings.ini
 characters.db
-gui/__pycache__/charactermanager.cpython-37.pyc
-gui/__pycache__/databasecomm.cpython-37.pyc
+gui/__pycache__/
 gui/__pycache__/gui_components.cpython-37.pyc
-gui/__pycache__/scraper.cpython-37.pyc
-gui/__pycache__/settings.cpython-37.pyc
+settings/__pycache__/settings.cpython-37.pyc
+web_scraper/__pycache__/scraper.cpython-37.pyc
+settings/__pycache__/__init__.cpython-37.pyc
+web_scraper/__pycache__/__init__.cpython-37.pyc
+gui/__pycache__/gui_components.cpython-37.pyc
+database/__pycache__/charactermanager.cpython-37.pyc
+database/__pycache__/databasecomm.cpython-37.pyc
+gui/__pycache__/gui_components.cpython-37.pyc
+

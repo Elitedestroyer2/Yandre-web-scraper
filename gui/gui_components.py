@@ -14,10 +14,9 @@ from kivy.uix.modalview import ModalView
 import tkinter as tk
 from tkinter import filedialog
 
-import scraper
-from scraper import searchSuggest
-from settings import set_path
-from charactermanager import return_characters
+from web_scraper import scraper
+from settings import settings
+from database import charactermanager
 
 class Blank(Label):
     pass
@@ -32,7 +31,7 @@ class SaveDirButton(Button):
         root.withdraw()
         directory = filedialog.askdirectory()
         if directory:
-            set_path(directory)
+            settings.set_path(directory)
         else:
             pass
 
@@ -104,9 +103,9 @@ class CharacterTextInput(TextInput):
     
     def get_suggestions(self, keycode):
         if keycode[1] == 'backspace':
-            suggestions = searchSuggest(self.text)
+            suggestions = scraper.searchSuggest(self.text)
         else:
-            suggestions = searchSuggest(self.text + keycode[1])
+            suggestions = scraper.searchSuggest(self.text + keycode[1])
         return suggestions
 
 
@@ -166,29 +165,69 @@ class CharacterSelect(SelectableLabel):
                 App.get_running_app().root.ids.search_box.text = App.get_running_app().root.ids.suggestions_dropdown.data[self.index]['text']
             hide_widget(App.get_running_app().root.ids.suggestions_dropdown)
 
-class AddedCharacterSelect(SelectableLabel):
-    def apply_selection(self, rv, index, is_selected):
-        ''' Respond to the selection of items in the view. '''
-        self.selected = is_selected
-        if is_selected:
-            pass
-        else:
-            pass
-
 
 class CharacterModalView(ModalView):
+    charactesToRemove = []
+
+    def start_up(self):
+        self.create_connection()
+        self.get_characters()
+        self.update_modal_view()
+
     def get_characters(self):
         self.characterList = []
-        characters = return_characters('characters')
+        characters = self.conn.return_added_characters()
         if characters:
             for character in characters:
                 self.characterList.append({'text': character[0]})
+        hide_widget(self.ids.character_list, False)
+        self.close_connection()
+
+    def update_modal_view(self):
         self.ids.character_list.data = self.characterList
         self.ids.character_list.refresh_from_data()
-        hide_widget(self.ids.character_list, False)
     
-    def remove_character(self):
-        pass
+    def remove_character(self, characterName):
+        self.conn.remove_added_character(characterName)
+
+    def create_connection(self):
+        self.conn = charactermanager.dbConnection()
+        self.conn.connect()
+    
+    def close_connection(self):
+        self.conn.close_connection()
+
+    def remove_character_button(self):
+        self.create_connection()
+        characterNames = self.get_selected_remove_characters()
+        for characterName in characterNames:
+            self.remove_character(characterName)
+        self.get_characters()
+        #reset selected nodes
+        self.ids.character_list.children[0].selected_nodes = []
+        self.update_modal_view()
+        self.close_connection()
+    
+    def get_selected_remove_characters(self):
+        characters_to_remove = []
+        #the node provides the index for the character that is selected
+        for node in self.ids.character_list.children[0].selected_nodes:
+            #appends the name to list of characters to remove
+            characters_to_remove.append(self.ids.character_list.data[node]['text'])
+        return characters_to_remove
+
+    class AddedCharacterSelect(SelectableLabel):
+        def apply_selection(self, rv, index, is_selected):
+            ''' Respond to the selection of items in the view. '''
+            self.selected = is_selected
+            if is_selected:
+                pass
+            else:
+                try:
+                    pass
+                except:
+                    pass
+
 
 def hide_widget(wid, dohide=True):
     if hasattr(wid, 'saved_attrs'):
