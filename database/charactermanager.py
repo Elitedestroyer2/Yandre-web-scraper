@@ -21,12 +21,17 @@ class dbConnection:
     def add_character(self, characterName, amount):
         character = (Character(characterName, amount = amount))
         if not self.memConn.check_character_exsits([character.name]):
-            self.memConn.enter_new_character([character.name, character.url, character.count, character.amount])
+            self.memConn.enter_new_character([character.name, character.amount])
         else:
             self.memConn.update_character_amount([character.amount, character.name])
     
     def grab_added_character(self):
-        return self.memConn.grab_added_character()
+        characterInfo = self.memConn.get_entry()
+        for character in characterInfo:
+            characterName = character[0]
+            characterAmount = character[1]
+            characterAmount = int(characterAmount)
+        return characterName, characterAmount
 
     def remove_added_character(self, characterName):
         self.memConn.delete_character([characterName])

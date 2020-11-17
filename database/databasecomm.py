@@ -69,9 +69,10 @@ class tempConnection(object):
             #Create Table if it doesn't exist
             if c.fetchone()[0] == 0:
                 #Bad practice to make this dynamic due to possible sql injections
-                c.execute('''CREATE TABLE addedCharacters(Name, Url, Count, Amount)''')
+                c.execute('''CREATE TABLE addedCharacters(Name, Amount)''')
             self.conn = conn
             self.c = c
+            self.currentId = [1]
             return conn, c
 
         except Error as e:
@@ -89,7 +90,7 @@ class tempConnection(object):
             return False
 
     def enter_new_character(self, character):
-        self.c.execute('INSERT INTO addedCharacters VALUES (?,?,?,?)', character)
+        self.c.execute('INSERT INTO addedCharacters VALUES (?,?)', character)
         self.conn.commit()
 
     def update_character_amount(self, characterAmountAndName):
@@ -100,12 +101,9 @@ class tempConnection(object):
         return self.c.execute('''SELECT Name FROM addedCharacters ''')
     
     def get_entry(self):
-        if self.currentId:
-            self.currentId += 1
-            return self.c.execute('''SELECT name FROM addedCharacters WHERE rowid = ? ''', self.currentId)
-        else:
-            self.currentId = 0
-            return self.c.execute('''SELECT name FROM addedCharacters WHERE rowid = ? ''', self.currentId)
+        characterInfo = self.c.execute('''SELECT * FROM addedCharacters WHERE rowid = ? ''', self.currentId)
+        self.currentId[0] += 1
+        return characterInfo
 
     def delete_character(self, character):
         self.c.execute('''DELETE FROM addedCharacters WHERE Name=? ''', character)

@@ -18,6 +18,7 @@ def write_settings():
 def read_settings():
     config.read('settings/settings.ini')
     myPath = config.get('Configuartion', 'Save_Directory')
+    return myPath
 
 def set_path(path):
     myPath = path

@@ -14,7 +14,8 @@ class Launch(FloatLayout):
         self.connectToDatabases()
 
     def send(self, lewd, wholesome, duplicate):
-        scraper.grab_pictures(lewd, wholesome, duplicate)
+        self.scrap = scraper.scraper()
+        self.scrap.grab_pictures(lewd, wholesome, duplicate)
     
     def add(self, characterName, amount):
         if characterName:
