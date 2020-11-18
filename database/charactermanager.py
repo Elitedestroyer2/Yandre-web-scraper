@@ -1,10 +1,9 @@
 from database import databasecomm
 
 class Character:
-    def __init__(self, name, url = '', count = 0, amount = 20):
+    def __init__(self, name, url='', amount = 20):
         self.name = name
         self.url = url
-        self.count = count
         self.amount = amount
 
 class dbConnection:
@@ -25,13 +24,13 @@ class dbConnection:
         else:
             self.memConn.update_character_amount([character.amount, character.name])
     
-    def grab_added_character(self):
-        characterInfo = self.memConn.get_entry()
+    def grab_added_characters(self):
+        characterInfo = self.memConn.get_characters_table()
+        characters = []
         for character in characterInfo:
-            characterName = character[0]
-            characterAmount = character[1]
-            characterAmount = int(characterAmount)
-        return characterName, characterAmount
+            #taking grabed info from database, and returning it as a class Character
+            characters.append(Character(character[0],character[1]))
+        return characters
 
     def remove_added_character(self, characterName):
         self.memConn.delete_character([characterName])
@@ -39,6 +38,9 @@ class dbConnection:
     def close_connection(self):
         self.conn.close_connection()
         self.memConn.close_connection()
+    
+    def delete_table(self):
+        self.memConn.delete_table()
     
 
     

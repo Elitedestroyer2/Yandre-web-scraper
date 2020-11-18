@@ -29,18 +29,21 @@ class scraper(object):
         self.characters = []
 
         #create character from character class
-        characterName, characterAmount = self.grab_added_character_name()
-        self.character = Character(characterName, self.fetch_character_url(characterName), characterAmount)
-        self.url = f"https://yande.re/tag?name={self.character.name}&order=count&page={self.pageCounter}&type=4"
+        self.characters = self.grab_added_character_name()
+        #clear database
+        self.delete_characters_from_table()
+        for character in self.characters:
+            self.character = Character(character.name, self.fetch_character_url(character.name), character.amount)
+            self.url = f"https://yande.re/tag?name={self.character.name}&order=count&page={self.pageCounter}&type=4"
 
-        #check if directory exsits for current character, if not, create one. Get folderPath
-        self.folderPath = self.checkCharacterDir()
-        #set fileCount
-        self.get_current_file_count()
-        #set amount of pictures to stop at
-        self.stopAmount = characterAmount + self.fileCount
-        #start downloading pictures
-        self.download_pictures()
+            #check if directory exsits for current character, if not, create one. Get folderPath
+            self.folderPath = self.checkCharacterDir()
+            #set fileCount
+            self.get_current_file_count()
+            #set amount of pictures to stop at
+            self.stopAmount = self.character.amount + self.fileCount
+            #start downloading pictures
+            self.download_pictures()
 
     def connect_to_database(self):
         conn = charactermanager.dbConnection()
@@ -48,8 +51,10 @@ class scraper(object):
         return conn
 
     def grab_added_character_name(self):
-        return self.conn.grab_added_character()
-        
+        return self.conn.grab_added_characters()
+    
+    def delete_characters_from_table(self):
+        self.conn.delete_table()
 
     def fetch_character_url(self, characterName):
         return f'https://yande.re/post?page={self.pageCounter}&tags={characterName}'
@@ -110,21 +115,20 @@ class scraper(object):
                 break
             #grab page elements for all thumbnail pictures
             thumbnail_links = self.getPage_thumbnails(self.character)
-            for thumbnail_link in thumbnail_links:
-                #links to full pictures
-                href_element = thumbnail_link['href']
-                download_link, safeRating = self.getpage_download_and_saferating(href_element)
-                if self.lewdFilter or self.wholesomeFilter:
-                    wholesome, lewd = self.ratingCheck(safeRating)
-                    if self.wholesomeFilter and wholesome:
-                        self.download(download_link)
-                    elif self.lewdFilter and lewd:
-                        self.download(download_link)
-                    else:
-                        #go to the next iteration
-                        continue
-                else:
+            #links to full pictures
+            href_element = thumbnail_link['href']
+            download_link, safeRating = self.getpage_download_and_saferating(href_element)
+            if self.lewdFilter or self.wholesomeFilter:
+                wholesome, lewd = self.ratingCheck(safeRating)
+                if self.wholesomeFilter and wholesome:
                     self.download(download_link)
+                elif self.lewdFilter and lewd:
+                    self.download(download_link)
+                else:
+                    #go to the next iteration
+                    continue
+            else:
+                self.download(download_link)
 
     def download(self, download_link):
 

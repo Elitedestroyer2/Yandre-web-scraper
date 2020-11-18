@@ -104,7 +104,13 @@ class tempConnection(object):
         characterInfo = self.c.execute('''SELECT * FROM addedCharacters WHERE rowid = ? ''', self.currentId)
         self.currentId[0] += 1
         return characterInfo
+    
+    def get_characters_table(self):
+        return self.c.execute('''SELECT * FROM addedCharacters ''')
 
     def delete_character(self, character):
         self.c.execute('''DELETE FROM addedCharacters WHERE Name=? ''', character)
         self.conn.commit()
+    
+    def delete_table(self):
+        self.c.execute('''DROP TABLE addedCharacters''')
