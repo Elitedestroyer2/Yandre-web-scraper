@@ -13,22 +13,34 @@ class Launch(FloatLayout):
         super(Launch, self).__init__(**kwargs)
         self.connectToDatabases()
 
-    def send(self, lewd, wholesome, duplicate):
-        self.scrap = scraper.scraper()
-        self.scrap.grab_pictures(lewd, wholesome, duplicate)
+    def send(self):
+        if not hasattr(self, 'scrap'):
+            self.scrap = scraper.scraper()
+        self.scrap.grab_pictures()
     
-    def add(self, characterName, amount):
+    def add(self, characterName, amount, lewd, wholesome, duplicate):
         if characterName:
-            self.conn.add_character(characterName, amount)
-            App.get_running_app().root.ids.search_box.text = ''
-            App.get_running_app().root.ids.amount.text = ''
+            self.conn.add_added_character(characterName, amount, lewd, wholesome, duplicate)
+            #reset the view
+            self.reset_view()
         else:
             pass
+    
 
+    def reset_view(self):
+        App.get_running_app().root.ids.search_box.text = ''
+        App.get_running_app().root.ids.amount.text = ''
+        App.get_running_app().root.ids.lewd.state = 'normal'
+        App.get_running_app().root.ids.wholesome.state = 'normal'
+        App.get_running_app().root.ids.duplication.state = 'normal'
+        
     def connectToDatabases(self):
         self.conn = charactermanager.dbConnection()
         self.conn.connect()
 
+    def update_collection(self):
+        collection = scraper.updateCollection()
+        collection.update()
 
 class ScraperApp(App):
 

@@ -17,11 +17,11 @@ def write_settings():
 
 def read_settings():
     config.read('settings/settings.ini')
-    myPath = config.get('Configuartion', 'Save_Directory')
-    return myPath
+    sav_dir = config.get('Configuartion', 'Save_Directory')
+    return sav_dir
 
 def set_path(path):
-    myPath = path
+    sav_dir = path
     #update config
     config.read('settings/settings.ini')
     config.set('Configuartion', 'Save_Directory', path)

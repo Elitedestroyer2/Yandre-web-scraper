@@ -117,7 +117,7 @@
     auto_dismiss: False
     on_pre_open: root.start_up()
     background: 'gui/Images/3.jpg'
-    id: mv
+    id: charactermv
 
     BoxLayout:
         orientation: 'vertical'
@@ -135,12 +135,12 @@
                 on_release: root.dismiss()
             Button:
                 text: 'remove'
-                on_release: gui_comp.remove_character_button(mv)
+                on_release: gui_comp.remove_character_button(charactermv)
 
 <CollectionModalView@ModalView>:
     size_hint: 1,1
     auto_dismiss: False
-    on_pre_open: root.get_characters()
+    on_pre_open: root.start_up()
     background: 'gui/Images/3.jpg'
 
     BoxLayout:
@@ -154,8 +154,6 @@
             Button: 
                 text: 'close'
                 on_release: root.dismiss()
-            Button:
-                text: 'remove'
 
 <Launch>:
     AnchorLayout:
@@ -232,18 +230,24 @@
                 text: 'Save directory'
             Blank:
             Button:
-                text: 'Add character'
-                on_press: root.add(root.ids.search_box.text, root.ids.amount.text)
+                text: 'Show collection'
+                on_release: Factory.CollectionModalView().open()
+            Button:
+                text: 'Update collection'
+                on_release: root.update_collection()
+            Blank:
             Button:
                 text: 'Show added characters'
                 on_release: Factory.CharacterModalView().open()
+            Button:
+                text: 'Change default values'
+            Blank:
+            Button:
+                text: 'Add character'
+                on_press: root.add(root.ids.search_box.text, root.ids.amount.text, root.ids.lewd.state, root.ids.wholesome.state, root.ids.duplication.state)
+            Blank:
             Blank:
             Button:
                 text: 'Start download'
-                on_press: root.send(root.ids.lewd.state, root.ids.wholesome.state, root.ids.duplication.state)
-            Button:
-                text: 'Show collection'
-            Blank:
-            Blank:
-            Button:
-                text: 'Update collection'
+                on_press: root.send()
+

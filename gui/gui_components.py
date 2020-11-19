@@ -179,9 +179,25 @@ class CharacterModalView(ModalView):
         characters = self.conn.return_added_characters()
         if characters:
             for character in characters:
-                self.characterList.append({'text': character[0]})
+                self.characterList.append({'text': self.create_string_for_added_character_list(character)})
         hide_widget(self.ids.character_list, False)
         self.close_connection()
+
+    def create_string_for_added_character_list(self, character):
+        string = character.name + ', ' + str(character.amount)
+        if character.lewd and not character.duplicate:
+            string = string + ', ' + 'Lewd'
+        elif character.lewd and character.duplicate:
+            string = string + ', ' + 'Lewd' + ', ' + 'Duplication check'
+        elif character.wholesome and not character.duplicate:
+            string = string + ', ' + 'Wholesome'
+        elif character.wholesome and character.duplicate:
+            string = string + ', ' + 'Wholesome' + ', ' + 'Duplication check'
+        elif not character.lewd and character.duplicate:
+            string = string + ', ' + 'Duplication check'
+        elif not character.wholesome and character.duplicate:
+            string = string + ', ' + 'Duplication check'
+        return string
 
     def update_modal_view(self):
         self.ids.character_list.data = self.characterList
@@ -213,7 +229,8 @@ class CharacterModalView(ModalView):
         #the node provides the index for the character that is selected
         for node in self.ids.character_list.children[0].selected_nodes:
             #appends the name to list of characters to remove
-            characters_to_remove.append(self.ids.character_list.data[node]['text'])
+            character_to_remove = (self.ids.character_list.data[node]['text']).split(',',1)
+            characters_to_remove.append(character_to_remove[0])
         return characters_to_remove
 
     class AddedCharacterSelect(SelectableLabel):
@@ -228,6 +245,21 @@ class CharacterModalView(ModalView):
                 except:
                     pass
 
+class CollectionModalView(CharacterModalView):
+
+    def start_up(self):
+        self.create_connection()
+        self.get_characters()
+        self.update_modal_view()
+
+    def get_characters(self):
+        self.characterList = []
+        characters = self.conn.return_characters()
+        if characters:
+            for character in characters:
+                self.characterList.append({'text': character.name + ', ' + str(character.amount)})
+        hide_widget(self.ids.character_list, False)
+        self.close_connection()
 
 def hide_widget(wid, dohide=True):
     if hasattr(wid, 'saved_attrs'):

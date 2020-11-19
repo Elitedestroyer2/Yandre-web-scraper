@@ -8,17 +8,17 @@ class Connection(object):
         #characters = (Name, Url, Count, Amount)
         conn = None
         try:
-            conn = sqlite3.connect(f'characters.db')
+            conn = sqlite3.connect('database/db/characters.db')
 
             c = conn.cursor()
 
             #Check if tabel exists
-            c.execute('''SELECT count(Name) FROM sqlite_master WHERE type='table' AND Name='characters' ''')
+            c.execute('''SELECT count(Name) FROM sqlite_master WHERE type='table' AND Name='Characters' ''')
             
             #Create Table if it doesn't exist
             if c.fetchone()[0] == 0:
                 #Bad practice to make this dynamic due to possible sql injections
-                c.execute('''CREATE TABLE characters(Name, Url, Count, Amount)''')
+                c.execute('''CREATE TABLE Characters(Name, Amount)''')
             self.conn = conn
             self.c = c
             return conn, c
@@ -31,18 +31,18 @@ class Connection(object):
 
     def check_character_exsits(self, characterName):
         #See if character's name exsits
-        self.c.execute('''SELECT count(Name) FROM characters WHERE Name=? ''', characterName)
+        self.c.execute('''SELECT count(Name) FROM Characters WHERE Name=? ''', characterName)
         if self.c.fetchone()[0] == 1:
             return True
         else:
             return False
 
     def enter_new_character(self, character):
-        self.c.execute('INSERT INTO characters VALUES (?,?,?,?)', character)
+        self.c.execute('INSERT INTO Characters VALUES (?,?)', character)
         self.conn.commit()
 
-    def update_character_amount(self, characterAmountAndName):
-        self.c.execute('''UPDATE characters SET Amount=? WHERE Name=? ''', characterAmountAndName)
+    def update_character_amount(self, character):
+        self.c.execute('''UPDATE Characters SET Amount=? WHERE Name=? ''', character)
         self.conn.commit()
 
     def get_characters_names(self):
@@ -52,6 +52,14 @@ class Connection(object):
         self.c.execute('''DELETE FROM characters WHERE Name='hatsune_miku' ''')
         self.conn.commit()
 
+    def get_character_table(self):
+        return self.c.execute('''SELECT * FROM Characters ''')
+
+    def delete_table(self):
+        self.c.execute('''DROP TABLE Characters''')
+    
+    def create_table(self):
+        self.c.execute('''CREATE TABLE Characters(Name, Amount)''')
 
 class tempConnection(object):
     def create_connection(self):
@@ -69,7 +77,7 @@ class tempConnection(object):
             #Create Table if it doesn't exist
             if c.fetchone()[0] == 0:
                 #Bad practice to make this dynamic due to possible sql injections
-                c.execute('''CREATE TABLE addedCharacters(Name, Amount)''')
+                c.execute('''CREATE TABLE addedCharacters(Name, Amount, Lewd, Wholesome, Duplicate )''')
             self.conn = conn
             self.c = c
             self.currentId = [1]
@@ -90,11 +98,11 @@ class tempConnection(object):
             return False
 
     def enter_new_character(self, character):
-        self.c.execute('INSERT INTO addedCharacters VALUES (?,?)', character)
+        self.c.execute('INSERT INTO addedCharacters VALUES (?,?,?,?,?)', character)
         self.conn.commit()
 
-    def update_character_amount(self, characterAmountAndName):
-        self.c.execute('''UPDATE addedCharacters SET Amount=? WHERE Name=? ''', characterAmountAndName)
+    def update_character_amount(self, character):
+        self.c.execute('''UPDATE addedCharacters SET Amount=?, Lewd=?, Wholesome=?, Duplicate=? WHERE Name=? ''', character)
         self.conn.commit()
 
     def get_characters_names(self):

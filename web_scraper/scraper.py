@@ -10,17 +10,14 @@ from settings import settings
 MAX_PICTURES = 60
 MIN_PICTURES = 800
 mainURL = "https://yande.re/"
-myPath = 'CharactersForRec'
+sav_dir = 'CharactersForRec'
 
 
 class scraper(object):
 
-    def grab_pictures(self, lewdFilter, wholesomeFilter, duplicateFilter):
+    def grab_pictures(self):
         self.MAINURL = "https://yande.re/"
-        self.myPath = settings.read_settings()
-        self.lewdFilter = self.toggleToBool(lewdFilter)
-        self.wholesomeFilter = self.toggleToBool(wholesomeFilter)
-        self.duplicateFilter = self.toggleToBool(duplicateFilter)
+        self.sav_dir = settings.read_settings()
 
         #create connection to database
         self.conn = self.connect_to_database()
@@ -31,36 +28,56 @@ class scraper(object):
         #create character from character class
         self.characters = self.grab_added_character_name()
         #clear database
-        self.delete_characters_from_table()
+        #the check fixes the 'no table' bug that can be casued in the menu by hitting the download button before the
+        # add character button
+        if self.characters:
+            self.delete_added_characters_from_table()
         for character in self.characters:
+            self.assign_filter_values(character)
             self.character = Character(character.name, self.fetch_character_url(character.name), character.amount)
             self.url = f"https://yande.re/tag?name={self.character.name}&order=count&page={self.pageCounter}&type=4"
 
             #check if directory exsits for current character, if not, create one. Get folderPath
             self.folderPath = self.checkCharacterDir()
             #set fileCount
-            self.get_current_file_count()
+            self.fileCount = self.get_current_file_count()
             #set amount of pictures to stop at
             self.stopAmount = self.character.amount + self.fileCount
             #start downloading pictures
             self.download_pictures()
+            self.update_database()
+            self.updateCol = updateCollection()
+            self.updateCol.update()
+        self.conn.close_connection()
 
     def connect_to_database(self):
         conn = charactermanager.dbConnection()
         conn.connect()
         return conn
 
+    def assign_filter_values(self, character):
+        self.lewdFilter = character.lewd
+        self.wholesomeFilter = character.wholesome
+        self.duplicateFilter = character.duplicate
+
+    def update_database(self):
+        amount = self.get_current_file_count() - 1
+        character_name = self.character.name
+        character_name = character_name.replace('_', ' ')
+        self.conn.add_character(character_name, amount)
+        pass
+
     def grab_added_character_name(self):
         return self.conn.grab_added_characters()
     
-    def delete_characters_from_table(self):
-        self.conn.delete_table()
+    def delete_added_characters_from_table(self):
+        self.conn.delete_added_table()
 
     def fetch_character_url(self, characterName):
         return f'https://yande.re/post?page={self.pageCounter}&tags={characterName}'
     
     def checkCharacterDir(self):
-        folderPath = self.myPath + "/" + self.character.name
+        folderPath = self.sav_dir + "/" + self.character.name
         folderPath = folderPath.replace('_', ' ')
         isdir = os.path.isdir(folderPath)
 
@@ -89,7 +106,8 @@ class scraper(object):
     
     def get_current_file_count(self):
         #Grab the number of files and add one to it so that the save does not overwrite the last file in the folder
-        self.fileCount = len(next(os.walk(self.folderPath))[2]) + 1
+        fileCount = len(next(os.walk(self.folderPath))[2]) + 1
+        return fileCount
 
     def ratingCheck(self, safeRating):
         #Will return states of Wholesome, and lewd, respectively 
@@ -135,11 +153,10 @@ class scraper(object):
         fullfilename = os.path.join(self.folderPath, str(self.fileCount) + '.jpg')
         urllib.request.urlretrieve(download_link, fullfilename)
         if self.duplicateFilter:
-            if not (checkForDuplicate(self.file_count)):
-                self.get_current_file_count()
+            if not (checkForDuplicate(self.fileCount)):
+                self.fileCount = self.get_current_file_count()
         else:
-            self.get_current_file_count()
-
+            self.fileCount = self.get_current_file_count()
 
                 
 
@@ -235,7 +252,7 @@ class scraper(object):
 
     def getPage1(character):
         page = requests.get(character.url)
-        folderPath = myPath + "/" + character.name
+        folderPath = sav_dir + "/" + character.name
         folderPath = folderPath.replace('_', ' ')
         isdir = os.path.isdir(folderPath)
 
@@ -267,14 +284,10 @@ def grabCharacter(url):
 
     for result, number in zip(resultsForCharacters, numbers):
         #Grabs characters names from the list page and puts them in a list
-        if int(number) < MIN_PICTURES:
-            done = True
-            return done, characters
-        else:
-            characterUrl = result.contents[3].attrs['href']
-            characterUrl = characterUrl.replace('post?', 'post?page=1&')
-            characterName = result.contents[3].contents[0]
-            characters.append(Character(characterName, mainURL + characterUrl, number))
+        characterUrl = result.contents[3].attrs['href']
+        characterUrl = characterUrl.replace('post?', 'post?page=1&')
+        characterName = result.contents[3].contents[0]
+        characters.append(Character(characterName, mainURL + characterUrl, number))
     return done, characters
 
 def pageResults(url):
@@ -306,3 +319,26 @@ def searchSuggest(input):
             break
     grabed_characters.clear()
     return suggested_characters
+
+class updateCollection(object):
+
+    def update(self):
+        self.conn = self.connect_to_database()
+        sav_dir = settings.read_settings()
+        list_folders = os.listdir(sav_dir)
+        self.conn.delete_table()
+        self.conn.create_table()
+        for folder in list_folders:
+            folder_path = self.get_folder_path(sav_dir, folder)
+            amount_of_pics_in_folder = len(next(os.walk(folder_path))[2])
+            self.conn.add_character(folder, amount_of_pics_in_folder)
+        self.conn.close_connection()
+    
+    def connect_to_database(self):
+        conn = charactermanager.dbConnection()
+        conn.connect()
+        return conn
+
+    def get_folder_path(self, sav_dir, folder):
+        folder_path = sav_dir + '/' + folder
+        return folder_path
