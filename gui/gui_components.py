@@ -261,6 +261,18 @@ class CollectionModalView(CharacterModalView):
         hide_widget(self.ids.character_list, False)
         self.close_connection()
 
+class SettingsModalView(CharacterModalView):
+        def start_up(self):
+            self.create_connection()
+            self.get_characters()
+            self.update_modal_view()
+
+
+class WarningModalView(ModalView):
+    def start_up(self):
+        pass
+
+
 def hide_widget(wid, dohide=True):
     if hasattr(wid, 'saved_attrs'):
         if not dohide:

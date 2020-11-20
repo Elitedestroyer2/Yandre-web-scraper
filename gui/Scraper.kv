@@ -13,6 +13,7 @@
 #:set Emperor 81/255, 81/255, 81/255, 1
 #:set Mine_Shaft 59/255, 59/255, 59/255, 1
 #:set Mine_Shaft_Dark 34/255, 34/255, 34/255, 1
+#:set Mine_Shaft_Dark_Transparent 34/255, 34/255, 34/255, .5
 #:set Dark_Gray 7/255, 7/255, 7/255, 1
 #:set toggle True
 
@@ -155,6 +156,27 @@
                 text: 'close'
                 on_release: root.dismiss()
 
+<WarningModalView@ModalView>:
+    size_hint: .5,.5
+    auto_dismiss: False
+    background_color: Mine_Shaft_Dark_Transparent
+    background: 'gui/Images/3.jpg'
+
+    AnchorLayout:
+        anchor_x: 'center'
+        anchor_y: 'center'
+
+        Label:
+            id: warning_label
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size: self.parent.size
+        pos: self.parent.pos
+        Button:
+            text: 'Ok'
+            on_release: root.dismiss()
+
 <Launch>:
     AnchorLayout:
         anchor_x: 'center'
@@ -171,7 +193,7 @@
             padding: 10, 10
             canvas.before:
                 Color:
-                    rgba: .13,.13,.13,1
+                    rgba: Mine_Shaft_Dark
                 Rectangle:
                     pos: self.pos
                     size: self.size
@@ -212,6 +234,7 @@
             ToggleButton:
                 text: 'Duplication Check'
                 id: duplication
+                on_release: root.check_first_time_duplication()
             ToggleButton:
                 text: 'Wholesome Only'
                 id: wholesome

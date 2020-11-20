@@ -26,6 +26,13 @@ class Launch(FloatLayout):
         else:
             pass
     
+    def check_first_time_duplication(self):
+        if settings.settings.get_first_duplication() == True:
+            warning_text = 'This will dramatically increase the time to download pictures!!!'
+            self.warning = gui_components.WarningModalView()
+            self.warning.ids.warning_label.text = warning_text
+            self.warning.open()
+
 
     def reset_view(self):
         App.get_running_app().root.ids.search_box.text = ''
