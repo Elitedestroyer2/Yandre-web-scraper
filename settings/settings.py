@@ -30,11 +30,29 @@ def get_default_values():
     amount = config.get('Configuartion', 'Amount')
     max_amount = config.get('Configuartion', 'Max_amount')
     min_amount = config.get('Configuartion', 'Min_amount')
-    return amount, max_amount, min_amount
+    return int(amount), int(max_amount), int(min_amount)
+
+def set_default_values(amount, max_amount, min_amount):
+    config.read('settings/settings.ini')
+    config.set('Configuartion', 'Amount', amount)
+    config.set('Configuartion', 'Max_amount', max_amount)
+    config.set('Configuartion', 'Min_amount', min_amount)
+    with open('settings/settings.ini', 'w') as configfile:
+        config.write(configfile)
 
 def get_first_duplication():
     config.read('settings/settings.ini')
-    return bool(config.get('OneTimes', 'first_duplication'))
+    first_duplication_status = config.get('OneTimes', 'first_duplication')
+    if first_duplication_status == 'True':
+        return True
+    elif first_duplication_status == 'False':
+        return False
+
+def first_duplication_warning_done():
+    config.read('settings/settings.ini')
+    config.set('OneTimes', 'first_duplication', 'False')
+    with open('settings/settings.ini', 'w') as configfile:
+        config.write(configfile)
 
 
 def set_path(path):

@@ -89,7 +89,23 @@ class dbConnection:
             self.conn.enter_new_character([character.name, character.amount])
         else:
             self.conn.update_character_amount([character.amount, character.name])
+
+    def delete_suggestions_table(self):
+        self.conn.delete_suggestions_table()   
+
+    def create_suggestions_table(self):
+        self.conn.create_suggestions_table() 
+
+    def added_character_to_suggest_list(self, character_name):
+        self.conn.added_character_to_suggest_list([character_name])
     
+    def search_for_suggestions(self, search_text):
+        #modify for 'like' command in sqlite
+        search_text = '%' + search_text + '%'
+        return self.conn.search_for_suggestions([search_text])
+    
+    def grab_suggestion_list(self):
+        return self.conn.grab_suggestion_list()
 
 def kivy_state_to_bool(state):
     if state == 'normal':

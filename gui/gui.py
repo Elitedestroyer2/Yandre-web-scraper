@@ -7,6 +7,9 @@ import settings
 from gui import gui_components
 from database import charactermanager
 
+import multiprocessing
+import threading
+
 
 class Launch(FloatLayout):
     def __init__(self, **kwargs):
@@ -14,10 +17,25 @@ class Launch(FloatLayout):
         self.connectToDatabases()
 
     def send(self):
+        self.start_gif()
+        t2 = threading.Thread(target=self.download)
+        #t1 = threading.Thread(target=self.start_gif)
+
+        #t1.start()
+        t2.start()
+
+        
+        
+    def download(self):
         if not hasattr(self, 'scrap'):
             self.scrap = scraper.scraper()
         self.scrap.grab_pictures()
-    
+
+    def start_gif(self):
+        self.workingmv = gui_components.WorkingModalView()
+        self.workingmv.open()
+
+
     def add(self, characterName, amount, lewd, wholesome, duplicate):
         if characterName:
             self.conn.add_added_character(characterName, amount, lewd, wholesome, duplicate)
@@ -27,11 +45,12 @@ class Launch(FloatLayout):
             pass
     
     def check_first_time_duplication(self):
-        if settings.settings.get_first_duplication() == True:
+        if settings.settings.get_first_duplication():
             warning_text = 'This will dramatically increase the time to download pictures!!!'
             self.warning = gui_components.WarningModalView()
             self.warning.ids.warning_label.text = warning_text
             self.warning.open()
+            settings.settings.first_duplication_warning_done()
 
 
     def reset_view(self):
@@ -46,8 +65,28 @@ class Launch(FloatLayout):
         self.conn.connect()
 
     def update_collection(self):
-        collection = scraper.updateCollection()
-        collection.update()
+        if self.sav_dir_check():
+            collection = scraper.updateCollection()
+            collection.update()
+        else:
+            self.sav_dir_warning()
+
+    def sav_dir_check(self):
+        if settings.settings.read_settings() != '':
+            return True
+        else:
+            return False
+
+    def sav_dir_warning(self):
+        warning_text = 'Please choose a save directory!'
+        self.warning = gui_components.WarningModalView()
+        self.warning.ids.warning_label.text = warning_text
+        self.warning.open()
+
+    def update_suggestions(self):
+        self.suggetions_updater = scraper.suggestionsUpdater()
+        self.suggetions_updater.startUp()
+
 
 class ScraperApp(App):
 

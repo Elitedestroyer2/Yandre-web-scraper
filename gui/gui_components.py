@@ -37,6 +37,10 @@ class SaveDirButton(Button):
 
 class CharacterTextInput(TextInput):
 
+    def __init__(self, **kwargs):
+        super(CharacterTextInput, self).__init__(**kwargs)
+        self.create_connection()
+
     def keyboard_on_key_down(self, instance, keycode, text, modifiers):
         self.suggestions_data = []
         if keycode[1] == 'backspace':
@@ -55,6 +59,9 @@ class CharacterTextInput(TextInput):
         else:
             pass
 
+    def create_connection(self):
+        self.conn = charactermanager.dbConnection()
+        self.conn.connect()
 
     def update_suggestion_data(self, suggestions):
         if len(suggestions) == 0:
@@ -103,10 +110,19 @@ class CharacterTextInput(TextInput):
     
     def get_suggestions(self, keycode):
         if keycode[1] == 'backspace':
-            suggestions = scraper.searchSuggest(self.text)
+            suggestions_from_sql = self.conn.search_for_suggestions(self.text)
         else:
-            suggestions = scraper.searchSuggest(self.text + keycode[1])
+            suggestions_from_sql = self.conn.search_for_suggestions(self.text + keycode[1])
+        suggestions = self.sql_to_list(suggestions_from_sql)
         return suggestions
+
+    def sql_to_list(self, sql_cursor):
+        item_list =  []
+        for item in sql_cursor:
+            item_list.append(item[0])
+            if len(item_list) >= 10:
+                return item_list
+        return item_list
 
 
 
@@ -261,11 +277,38 @@ class CollectionModalView(CharacterModalView):
         hide_widget(self.ids.character_list, False)
         self.close_connection()
 
-class SettingsModalView(CharacterModalView):
+class DefaultValuesModalView(CharacterModalView):
         def start_up(self):
-            self.create_connection()
-            self.get_characters()
-            self.update_modal_view()
+            self.get_default_values()
+            self.update_page()
+
+        def get_default_values(self):
+            self.amount, self.max_amount, self.min_amount =  settings.get_default_values()
+        
+        def update_page(self):
+            self.ids.default_amount_text_input.hint_text = self.amount
+            self.ids.max_amount_for_collection_text_input.hint_text = self.max_amount
+            self.ids.min_amount_of_pics_required_to_start_download_text_input.hint_text = self.min_amount
+        
+        def apply_changes(self):
+            self.grab_and_set_all_values()
+            settings.set_default_values(self.amount, self.max_amount, self.min_amount)
+            self.dismiss()
+        
+        def grab_and_set_all_values(self):
+            if self.ids.default_amount_text_input.text == '':
+                pass
+            else:
+                self.amount = self.ids.default_amount_text_input.text
+            if self.ids.max_amount_for_collection_text_input.text == '':
+                pass
+            else:
+                self.max_amount = self.ids.max_amount_for_collection_text_input.text
+            if self.ids.min_amount_of_pics_required_to_start_download_text_input.text == '':
+                pass
+            else:
+                self.min_amount = self.ids.min_amount_of_pics_required_to_start_download_text_input.text
+
 
 
 class WarningModalView(ModalView):
@@ -281,3 +324,7 @@ def hide_widget(wid, dohide=True):
     elif dohide:
         wid.saved_attrs = wid.height, wid.size_hint_y, wid.opacity, wid.disabled
         wid.height, wid.size_hint_y, wid.opacity, wid.disabled = 0, None, 0, True
+
+class WorkingModalView(ModalView):
+    def start_up(self):
+        pass

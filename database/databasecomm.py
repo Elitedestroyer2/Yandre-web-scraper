@@ -19,6 +19,14 @@ class Connection(object):
             if c.fetchone()[0] == 0:
                 #Bad practice to make this dynamic due to possible sql injections
                 c.execute('''CREATE TABLE Characters(Name, Amount)''')
+            
+            c.execute('''SELECT count(Name) FROM sqlite_master WHERE type='table' AND Name='Suggestions' ''')
+
+            #Create Table if it doesn't exist
+            if c.fetchone()[0] == 0:
+                #Bad practice to make this dynamic due to possible sql injections
+                c.execute('''CREATE TABLE Suggestions(Name)''')
+
             self.conn = conn
             self.c = c
             return conn, c
@@ -60,6 +68,22 @@ class Connection(object):
     
     def create_table(self):
         self.c.execute('''CREATE TABLE Characters(Name, Amount)''')
+    
+    def delete_suggestions_table(self):
+        self.c.execute('''DROP TABLE Suggestions''')
+
+    def create_suggestions_table(self):
+        self.c.execute('''CREATE TABLE Suggestions(Name)''')
+
+    def added_character_to_suggest_list(self, character_name):
+        self.c.execute('''INSERT INTO Suggestions VALUES (?)''', character_name)
+        self.conn.commit()
+    
+    def search_for_suggestions(self, search_text):
+        return self.c.execute('''SELECT Name FROM Suggestions WHERE Name LIKE ? ''', search_text)
+
+    def grab_suggestion_list(self):
+        return self.c.execute('''SELECT * FROM Suggestions ''')
 
 class tempConnection(object):
     def create_connection(self):

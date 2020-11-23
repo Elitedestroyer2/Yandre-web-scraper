@@ -32,6 +32,9 @@ class scraper(object):
         # add character button
         if self.characters:
             self.delete_added_characters_from_table()
+        #add an 'all' function
+        if self.characters[0].name == 'ALL':
+            self.grab_suggestion_list()
         for character in self.characters:
             self.assign_filter_values(character)
             self.character = Character(character.name, self.fetch_character_url(character.name), character.amount)
@@ -49,6 +52,17 @@ class scraper(object):
             self.updateCol = updateCollection()
             self.updateCol.update()
         self.conn.close_connection()
+
+    def grab_suggestion_list(self):
+        self.characters.clear()
+        character_sql = self.conn.grab_suggestion_list()
+        amount, max_number, min_number = self.grab_default_values()
+        for character in character_sql:
+            self.characters.append(addedCharacter(character[0],False,True,False,amount,''))
+    
+    def grab_default_values(self):
+        amount, max_number, min_number = settings.get_default_values()
+        return amount, max_number, min_number
 
     def connect_to_database(self):
         conn = charactermanager.dbConnection()
@@ -144,7 +158,7 @@ class scraper(object):
                     self.download(download_link)
                 else:
                     #go to the next iteration
-                    continue
+                    pass
             else:
                 self.download(download_link)
 
@@ -157,7 +171,6 @@ class scraper(object):
                 self.fileCount = self.get_current_file_count()
         else:
             self.fileCount = self.get_current_file_count()
-
                 
 
     def unknown(self):
@@ -342,3 +355,69 @@ class updateCollection(object):
     def get_folder_path(self, sav_dir, folder):
         folder_path = sav_dir + '/' + folder
         return folder_path
+
+
+class suggestionsUpdater(object):
+
+    def __init__(self):
+        self.page_counter = 1
+        self.url = f'https://yande.re/tag?commit=Search&name=&order=count&page={self.page_counter}&type=4'
+
+    def startUp(self):
+        self.connect_to_database()
+        self.reset_suggestion_table()
+        self.grab_character_names_and_counts()
+        self.add_characters_to_suggestions()
+
+    def reset_suggestion_table(self):
+        self.conn.delete_suggestions_table()
+        self.conn.create_suggestions_table()
+    
+    def connect_to_database(self):
+        self.conn = charactermanager.dbConnection()
+        self.conn.connect()
+    
+    def grab_character_names_and_counts(self):
+        self.characters = []
+        done = False
+        while not done:
+            self.grab_html_data()
+            for character_name_outer_html, character_count_outer_html in zip(self.character_names_outer_html, self.character_counts_outer_html):
+                if int(character_count_outer_html.contents[0]) > 9:
+                    self.characters.append(CharacterSuggestion(character_name_outer_html.contents[3].contents[0], character_count_outer_html.contents[0]))
+                elif int(character_count_outer_html.contents[0]) < 10:
+                    done = True
+                    continue
+
+    def grab_html_data(self):
+        page = requests.get(self.url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        self.character_names_outer_html = soup.findAll('td', class_='tag-type-character')
+        self.character_counts_outer_html = soup.findAll('td', align ='right')
+        self.increment_page_counter()
+
+    def increment_page_counter(self):
+        self.page_counter += 1
+        self.url = f'https://yande.re/tag?commit=Search&name=&order=count&page={self.page_counter}&type=4'
+    
+    def add_characters_to_suggestions(self):
+        for character in self.characters:
+            self.conn.added_character_to_suggest_list(character.name)
+
+class CharacterSuggestion:
+    def __init__(self, name, count):
+        self.name = name
+        self.count = count
+
+class addedCharacter:
+    def __init__(self, name, lewd, wholesome, duplicate, amount, url=''):
+        DEFAULT_AMOUNT = 20
+        self.name = name
+        self.url = url
+        if amount == '':
+            self.amount = DEFAULT_AMOUNT
+        else:
+            self.amount = amount
+        self.lewd = lewd
+        self.wholesome = wholesome
+        self.duplicate = duplicate

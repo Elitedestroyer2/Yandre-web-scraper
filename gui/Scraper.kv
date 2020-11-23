@@ -160,14 +160,23 @@
     size_hint: .5,.5
     auto_dismiss: False
     background_color: Mine_Shaft_Dark_Transparent
-    background: 'gui/Images/3.jpg'
+    background: 'gui/Images/1.png'
 
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'center'
 
         Label:
+            size_hint: .75, .75
+            padding_x: 10
             id: warning_label
+            bold: 'True'
+            canvas.before:
+                Color:
+                    rgba: Emperor
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
     BoxLayout:
         orientation: 'horizontal'
@@ -176,6 +185,70 @@
         Button:
             text: 'Ok'
             on_release: root.dismiss()
+
+<WorkingModalView@ModalView>:
+    size_hint: 1,1
+    auto_dismiss: False
+
+    Image:
+        id: gif
+        source: 'gui/Images/Aqua_frog.gif'
+        center: self.parent.center
+        size_hint: 1, 1
+        allow_stretch: True
+        anim_delay: .1
+        anim_loop: 100000000000
+
+<DefaultValuesModalView@ModalView>:
+    size_hint: 1,1
+    auto_dismiss: False
+    id: default_values_mv
+    on_pre_open: root.start_up()
+
+    GridLayout:
+        cols: 3
+        size_hint: .8, .85
+        padding: 10, 10
+        canvas.before:
+            Color:
+                rgba: Mine_Shaft_Dark
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        TabLabel:
+            text: 'Default Amount'
+        Blank:
+        TabLabel:
+            text: 'Max Amount for collection'
+        TextInput:
+            id: default_amount_text_input
+            input_filter: 'int'
+        Blank:
+        TextInput:
+            id: max_amount_for_collection_text_input
+            input_filter: 'int'
+        Blank:
+        Blank:
+        Blank:
+        TabLabel:
+            text: 'Min Amount needed to download'
+        Blank:
+        Blank:
+        TextInput:
+            id: min_amount_of_pics_required_to_start_download_text_input
+            input_filter: 'int'
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size: self.parent.size
+        pos: self.parent.pos
+        Button:
+            text: 'Close'
+            on_release: root.dismiss()
+        Button:
+            text: 'Apply'
+            on_release: root.apply_changes()
+
 
 <Launch>:
     AnchorLayout:
@@ -263,12 +336,15 @@
                 text: 'Show added characters'
                 on_release: Factory.CharacterModalView().open()
             Button:
-                text: 'Change default values'
+                text: 'Update suggetions list'
+                on_release: root.update_suggestions()
             Blank:
             Button:
                 text: 'Add character'
                 on_press: root.add(root.ids.search_box.text, root.ids.amount.text, root.ids.lewd.state, root.ids.wholesome.state, root.ids.duplication.state)
-            Blank:
+            Button:
+                text: 'Change default values'
+                on_release: Factory.DefaultValuesModalView().open()
             Blank:
             Button:
                 text: 'Start download'
