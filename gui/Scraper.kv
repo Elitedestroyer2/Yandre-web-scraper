@@ -189,6 +189,7 @@
 <WorkingModalView@ModalView>:
     size_hint: 1,1
     auto_dismiss: False
+    id: loading_mv
 
     Image:
         id: gif
@@ -197,7 +198,7 @@
         size_hint: 1, 1
         allow_stretch: True
         anim_delay: .1
-        anim_loop: 100000000000
+        anim_loop: 0
 
 <DefaultValuesModalView@ModalView>:
     size_hint: 1,1

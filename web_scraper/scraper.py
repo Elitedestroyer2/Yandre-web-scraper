@@ -6,38 +6,44 @@ import cv2
 from database import charactermanager
 from settings import settings
 
+import concurrent.futures
 
 MAX_PICTURES = 60
 MIN_PICTURES = 800
 mainURL = "https://yande.re/"
 sav_dir = 'CharactersForRec'
+page_counter_global =1 
 
 
 class scraper(object):
+
+    def start_threads(self):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executer:
+            download_characters = {executer.submit(self.grab_pictures): 8}
 
     def grab_pictures(self):
         self.MAINURL = "https://yande.re/"
         self.sav_dir = settings.read_settings()
 
-        #create connection to database
-        self.conn = self.connect_to_database()
 
         self.pageCounter = 1
-        self.characters = []
+        #self.character = []
 
         #create character from character class
-        self.characters = self.grab_added_character_name()
-        #clear database
-        #the check fixes the 'no table' bug that can be casued in the menu by hitting the download button before the
-        # add character button
-        if self.characters:
-            self.delete_added_characters_from_table()
-        #add an 'all' function
-        if self.characters[0].name == 'ALL':
-            self.grab_suggestion_list()
-        for character in self.characters:
-            self.assign_filter_values(character)
-            self.character = Character(character.name, self.fetch_character_url(character.name), character.amount)
+        self.conn = self.connect_to_database()
+        self.updateCol = updateCollection()
+        while not self.table_empty():
+            self.conn.close_connection()
+            self.conn = self.connect_to_database()
+            self.character = self.grab_added_character_name()
+            if self.character == None:
+                break
+            self.delete_added_charater_from_db()
+            if self.character.name == 'ALL':
+                self.grab_suggestion_list()
+            self.conn.close_connection()
+            self.assign_filter_values(self.character)
+            self.character = Character(self.character.name, self.fetch_character_url(self.character.name), self.character.amount)
             self.url = f"https://yande.re/tag?name={self.character.name}&order=count&page={self.pageCounter}&type=4"
 
             #check if directory exsits for current character, if not, create one. Get folderPath
@@ -48,17 +54,33 @@ class scraper(object):
             self.stopAmount = self.character.amount + self.fileCount
             #start downloading pictures
             self.download_pictures()
+            self.conn = self.connect_to_database()
             self.update_database()
-            self.updateCol = updateCollection()
+            self.conn.close_connection()
             self.updateCol.update()
+            self.conn = self.connect_to_database()
         self.conn.close_connection()
 
+    def table_empty(self):
+        if self.conn.check_added_characters_table_count() > 0:
+            return False
+        else:
+            return True
+
+    def delete_added_charater_from_db(self):
+        self.conn.remove_added_character(self.character.name)
+
     def grab_suggestion_list(self):
-        self.characters.clear()
         character_sql = self.conn.grab_suggestion_list()
+        self.conn.delete_added_table()
+        self.conn.create_added_table()
         amount, max_number, min_number = self.grab_default_values()
         for character in character_sql:
-            self.characters.append(addedCharacter(character[0],False,True,False,amount,''))
+            if character.count < min_number:
+                pass
+            else:
+                self.character.append(addedCharacter(character[0],False,True,False,amount,''))
+                self.conn.add_added_character(character)
     
     def grab_default_values(self):
         amount, max_number, min_number = settings.get_default_values()
@@ -82,7 +104,7 @@ class scraper(object):
         pass
 
     def grab_added_character_name(self):
-        return self.conn.grab_added_characters()
+        return self.conn.grab_added_character()
     
     def delete_added_characters_from_table(self):
         self.conn.delete_added_table()
@@ -174,14 +196,14 @@ class scraper(object):
                 
 
     def unknown(self):
-        #Grab characters name and urls for the minimum amount of pictures
+        #Grab character name and urls for the minimum amount of pictures
         while not grabCharacter(url)[0]:
             tempCharacters = grabCharacter(url)[1]
             for char in tempCharacters:
-                characters.append(char)
+                character.append(char)
             pageCounter += 1
             url = f"https://yande.re/tag?name=&order=count&page={pageCounter}&type=4" 
-        for character in characters:
+        for character in character:
             previous_page = 1
             url_page = 1
             job_elems, file_count, folderPath = getPage(character)
@@ -289,19 +311,19 @@ class scraper(object):
 
 
 def grabCharacter(url):
-    characters = []
+    character = []
     numbers = []
     done = False
 
     resultsForCharacters, numbers = pageResults(url)
 
     for result, number in zip(resultsForCharacters, numbers):
-        #Grabs characters names from the list page and puts them in a list
+        #Grabs character names from the list page and puts them in a list
         characterUrl = result.contents[3].attrs['href']
         characterUrl = characterUrl.replace('post?', 'post?page=1&')
         characterName = result.contents[3].contents[0]
-        characters.append(Character(characterName, mainURL + characterUrl, number))
-    return done, characters
+        character.append(Character(characterName, mainURL + characterUrl, number))
+    return done, character
 
 def pageResults(url):
     numbers = []
@@ -360,31 +382,34 @@ class updateCollection(object):
 class suggestionsUpdater(object):
 
     def __init__(self):
-        self.page_counter = 1
-        self.url = f'https://yande.re/tag?commit=Search&name=&order=count&page={self.page_counter}&type=4'
+        self.url = f'https://yande.re/tag?commit=Search&name=&order=count&page={page_counter_global}&type=4'
 
     def startUp(self):
-        self.connect_to_database()
         self.reset_suggestion_table()
         self.grab_character_names_and_counts()
         self.add_characters_to_suggestions()
 
     def reset_suggestion_table(self):
+        self.connect_to_database()
         self.conn.delete_suggestions_table()
         self.conn.create_suggestions_table()
+        self.close_database()
     
     def connect_to_database(self):
         self.conn = charactermanager.dbConnection()
         self.conn.connect()
     
+    def close_database(self):
+        self.conn.close_connection()
+    
     def grab_character_names_and_counts(self):
-        self.characters = []
+        self.character = []
         done = False
         while not done:
             self.grab_html_data()
             for character_name_outer_html, character_count_outer_html in zip(self.character_names_outer_html, self.character_counts_outer_html):
                 if int(character_count_outer_html.contents[0]) > 9:
-                    self.characters.append(CharacterSuggestion(character_name_outer_html.contents[3].contents[0], character_count_outer_html.contents[0]))
+                    self.character.append(CharacterSuggestion(character_name_outer_html.contents[3].contents[0], character_count_outer_html.contents[0]))
                 elif int(character_count_outer_html.contents[0]) < 10:
                     done = True
                     continue
@@ -397,12 +422,15 @@ class suggestionsUpdater(object):
         self.increment_page_counter()
 
     def increment_page_counter(self):
-        self.page_counter += 1
-        self.url = f'https://yande.re/tag?commit=Search&name=&order=count&page={self.page_counter}&type=4'
+        global page_counter_global
+        page_counter_global += 1
+        self.url = f'https://yande.re/tag?commit=Search&name=&order=count&page={page_counter_global}&type=4'
     
     def add_characters_to_suggestions(self):
-        for character in self.characters:
-            self.conn.added_character_to_suggest_list(character.name)
+        self.connect_to_database()
+        for character in self.character:
+            self.conn.added_character_to_suggest_list(character)
+        self.close_database()
 
 class CharacterSuggestion:
     def __init__(self, name, count):

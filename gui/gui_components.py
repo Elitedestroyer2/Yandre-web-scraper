@@ -39,9 +39,9 @@ class CharacterTextInput(TextInput):
 
     def __init__(self, **kwargs):
         super(CharacterTextInput, self).__init__(**kwargs)
-        self.create_connection()
 
     def keyboard_on_key_down(self, instance, keycode, text, modifiers):
+        self.create_connection()
         self.suggestions_data = []
         if keycode[1] == 'backspace':
             self.backspace()
@@ -58,10 +58,14 @@ class CharacterTextInput(TextInput):
             self.hide_drop_down()
         else:
             pass
+        self.close_connection()
 
     def create_connection(self):
         self.conn = charactermanager.dbConnection()
         self.conn.connect()
+    
+    def close_connection(self):
+        self.conn.close_connection()
 
     def update_suggestion_data(self, suggestions):
         if len(suggestions) == 0:
@@ -186,11 +190,11 @@ class CharacterModalView(ModalView):
     charactesToRemove = []
 
     def start_up(self):
-        self.create_connection()
         self.get_characters()
         self.update_modal_view()
 
     def get_characters(self):
+        self.create_connection()
         self.characterList = []
         characters = self.conn.return_added_characters()
         if characters:
@@ -234,11 +238,11 @@ class CharacterModalView(ModalView):
         characterNames = self.get_selected_remove_characters()
         for characterName in characterNames:
             self.remove_character(characterName)
+        self.close_connection()
         self.get_characters()
         #reset selected nodes
         self.ids.character_list.children[0].selected_nodes = []
         self.update_modal_view()
-        self.close_connection()
     
     def get_selected_remove_characters(self):
         characters_to_remove = []
@@ -286,13 +290,13 @@ class DefaultValuesModalView(CharacterModalView):
             self.amount, self.max_amount, self.min_amount =  settings.get_default_values()
         
         def update_page(self):
-            self.ids.default_amount_text_input.hint_text = self.amount
-            self.ids.max_amount_for_collection_text_input.hint_text = self.max_amount
-            self.ids.min_amount_of_pics_required_to_start_download_text_input.hint_text = self.min_amount
+            self.ids.default_amount_text_input.hint_text = str(self.amount)
+            self.ids.max_amount_for_collection_text_input.hint_text = str(self.max_amount)
+            self.ids.min_amount_of_pics_required_to_start_download_text_input.hint_text = str(self.min_amount)
         
         def apply_changes(self):
             self.grab_and_set_all_values()
-            settings.set_default_values(self.amount, self.max_amount, self.min_amount)
+            settings.set_default_values(str(self.amount), str(self.max_amount), str(self.min_amount))
             self.dismiss()
         
         def grab_and_set_all_values(self):
@@ -327,4 +331,7 @@ def hide_widget(wid, dohide=True):
 
 class WorkingModalView(ModalView):
     def start_up(self):
+        pass
+
+    def check_if_to_close(self):
         pass

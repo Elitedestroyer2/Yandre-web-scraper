@@ -9,36 +9,49 @@ from database import charactermanager
 
 import multiprocessing
 import threading
+import concurrent.futures
 
 
 class Launch(FloatLayout):
     def __init__(self, **kwargs):
         super(Launch, self).__init__(**kwargs)
-        self.connectToDatabases()
 
     def send(self):
+        #Kivy must stay on the main thread, other wise Kivy pauses
         self.start_gif()
-        t2 = threading.Thread(target=self.download)
-        #t1 = threading.Thread(target=self.start_gif)
+        self.t2 = threading.Thread(target=self.download)
+        self.t3 = threading.Thread(target=self.download)
+        self.t4 = threading.Thread(target=self.download)
+        self.t5 = threading.Thread(target=self.download)
+        self.t2.start()
+        self.t3.start()
+        self.t4.start()
+        self.t5.start()
 
-        #t1.start()
-        t2.start()
-
-        
         
     def download(self):
-        if not hasattr(self, 'scrap'):
-            self.scrap = scraper.scraper()
-        self.scrap.grab_pictures()
+        #if not hasattr(self, 'scrap'):
+        #    self.scrap = scraper.scraper()
+        #self.scrap.grab_pictures()
+        #self.scrap.start_threads()
+        scrap = scraper.scraper()
+        scrap.grab_pictures()
 
     def start_gif(self):
         self.workingmv = gui_components.WorkingModalView()
         self.workingmv.open()
 
+    def check_if_done(self):
+        while True:
+            if not self.t2.is_alive():
+                self.workingmv.dismiss()
+                break
 
     def add(self, characterName, amount, lewd, wholesome, duplicate):
         if characterName:
+            self.connectToDatabases()
             self.conn.add_added_character(characterName, amount, lewd, wholesome, duplicate)
+            self.close_database()
             #reset the view
             self.reset_view()
         else:
@@ -64,6 +77,9 @@ class Launch(FloatLayout):
         self.conn = charactermanager.dbConnection()
         self.conn.connect()
 
+    def close_database(self):
+        self.conn.close_connection()
+
     def update_collection(self):
         if self.sav_dir_check():
             collection = scraper.updateCollection()
@@ -84,8 +100,27 @@ class Launch(FloatLayout):
         self.warning.open()
 
     def update_suggestions(self):
-        self.suggetions_updater = scraper.suggestionsUpdater()
-        self.suggetions_updater.startUp()
+        self.start_gif()
+        self.t2 = threading.Thread(target=self.update_suggestions_workers)
+        self.t3 = threading.Thread(target=self.update_suggestions_workers)
+        self.t4 = threading.Thread(target=self.update_suggestions_workers)
+        self.t5 = threading.Thread(target=self.update_suggestions_workers)
+        self.t6 = threading.Thread(target=self.update_suggestions_workers)
+        self.t7 = threading.Thread(target=self.update_suggestions_workers)
+        self.t8 = threading.Thread(target=self.update_suggestions_workers)
+        self.t9 = threading.Thread(target=self.update_suggestions_workers)
+        self.t2.start()
+        self.t3.start()
+        self.t4.start()
+        self.t5.start()
+        self.t6.start()
+        self.t7.start()
+        self.t8.start()
+        self.t9.start()
+
+    def update_suggestions_workers(self):
+        suggetions_updater = scraper.suggestionsUpdater()
+        suggetions_updater.startUp()
 
 
 class ScraperApp(App):
