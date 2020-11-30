@@ -2,19 +2,22 @@ import kivy
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 
-from web_scraper import scraper
+from web_scraper import _scraper
 import settings
 from gui import gui_components
-from database import charactermanager
+#from database import charactermanager
 
 import multiprocessing
 import threading
 import concurrent.futures
 
+from database import DbManager
+from common import classes
 
 class Launch(FloatLayout):
     def __init__(self, **kwargs):
         super(Launch, self).__init__(**kwargs)
+        self.dbManager = DbManager()
 
     def send(self):
         #Kivy must stay on the main thread, other wise Kivy pauses
@@ -49,14 +52,24 @@ class Launch(FloatLayout):
 
     def add(self, characterName, amount, lewd, wholesome, duplicate):
         if characterName:
-            self.connectToDatabases()
-            self.conn.add_added_character(characterName, amount, lewd, wholesome, duplicate)
+            self.connectToDatabase()
+            self.dbManager.add_added_character(characterName, amount, lewd, wholesome, duplicate)
             self.close_database()
             #reset the view
             self.reset_view()
         else:
             pass
     
+    def add_added_character(self, characterName, amount, lewd, wholesome, duplicate):
+        character = (classes.addedCharacter(characterName, amount = amount, lewd = lewd,
+                            wholesome = wholesome, duplicate = duplicate))
+        if not self.conn.check_added_character_exsits([character.name]):
+            self.conn.enter_added_new_character([character.name, character.amount, character.lewd,
+                                                character.wholesome, character.duplicate])
+        else:
+            self.conn.update_added_character_amount([character.amount, character.lewd,
+                                                character.wholesome, character.duplicate, character.name])
+
     def check_first_time_duplication(self):
         if settings.settings.get_first_duplication():
             warning_text = 'This will dramatically increase the time to download pictures!!!'
@@ -73,12 +86,11 @@ class Launch(FloatLayout):
         App.get_running_app().root.ids.wholesome.state = 'normal'
         App.get_running_app().root.ids.duplication.state = 'normal'
         
-    def connectToDatabases(self):
-        self.conn = charactermanager.dbConnection()
-        self.conn.connect()
+    def connectToDatabase(self):
+        self.dbManager.create_connection()
 
     def close_database(self):
-        self.conn.close_connection()
+        self.dbManager.close_connection()
 
     def update_collection(self):
         if self.sav_dir_check():

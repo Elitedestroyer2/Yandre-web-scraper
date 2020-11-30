@@ -14,9 +14,11 @@ from kivy.uix.modalview import ModalView
 import tkinter as tk
 from tkinter import filedialog
 
-from web_scraper import scraper
+from web_scraper import _scraper
 from settings import settings
-from database import charactermanager
+
+from database import DbManager
+#from database import charactermanager
 
 class Blank(Label):
     pass
@@ -41,6 +43,7 @@ class CharacterTextInput(TextInput):
         super(CharacterTextInput, self).__init__(**kwargs)
 
     def keyboard_on_key_down(self, instance, keycode, text, modifiers):
+        self.create_database_manager()
         self.create_connection()
         self.suggestions_data = []
         if keycode[1] == 'backspace':
@@ -60,12 +63,14 @@ class CharacterTextInput(TextInput):
             pass
         self.close_connection()
 
+    def create_database_manager(self):
+        self.dbManager = DbManager()
+
     def create_connection(self):
-        self.conn = charactermanager.dbConnection()
-        self.conn.connect()
+        self.dbManager.create_connection()
     
     def close_connection(self):
-        self.conn.close_connection()
+        self.dbManager.close_connection()
 
     def update_suggestion_data(self, suggestions):
         if len(suggestions) == 0:
@@ -114,9 +119,9 @@ class CharacterTextInput(TextInput):
     
     def get_suggestions(self, keycode):
         if keycode[1] == 'backspace':
-            suggestions_from_sql = self.conn.search_for_suggestions(self.text)
+            suggestions_from_sql = self.dbManager.search_for_suggestions(self.convert_search_text_to_sql(self.text))
         else:
-            suggestions_from_sql = self.conn.search_for_suggestions(self.text + keycode[1])
+            suggestions_from_sql = self.dbManager.search_for_suggestions(self.convert_search_text_to_sql(self.text + keycode[1]))
         suggestions = self.sql_to_list(suggestions_from_sql)
         return suggestions
 
@@ -127,6 +132,11 @@ class CharacterTextInput(TextInput):
             if len(item_list) >= 10:
                 return item_list
         return item_list
+
+    def convert_search_text_to_sql(self, search_text):
+        #modify for 'like' command in sqlite
+        search_text = '%' + search_text + '%'
+        return search_text
 
 
 
@@ -196,7 +206,7 @@ class CharacterModalView(ModalView):
     def get_characters(self):
         self.create_connection()
         self.characterList = []
-        characters = self.conn.return_added_characters()
+        characters = self.dbManager.return_added_characters()
         if characters:
             for character in characters:
                 self.characterList.append({'text': self.create_string_for_added_character_list(character)})
@@ -224,14 +234,14 @@ class CharacterModalView(ModalView):
         self.ids.character_list.refresh_from_data()
     
     def remove_character(self, characterName):
-        self.conn.remove_added_character(characterName)
+        self.dbManager.remove_added_character(characterName)
 
     def create_connection(self):
-        self.conn = charactermanager.dbConnection()
-        self.conn.connect()
+        self.dbManager = charactermanager.dbConnection()
+        self.dbManager.connect()
     
     def close_connection(self):
-        self.conn.close_connection()
+        self.dbManager.close_connection()
 
     def remove_character_button(self):
         self.create_connection()
@@ -274,7 +284,7 @@ class CollectionModalView(CharacterModalView):
 
     def get_characters(self):
         self.characterList = []
-        characters = self.conn.return_characters()
+        characters = self.dbManager.return_characters()
         if characters:
             for character in characters:
                 self.characterList.append({'text': character.name + ', ' + str(character.amount)})

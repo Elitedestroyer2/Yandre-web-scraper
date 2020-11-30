@@ -32,17 +32,6 @@ class dbConnection:
     def return_characters(self):
         characters = self.change_to_character_format(self.conn.get_character_table())
         return characters
-
-
-    def add_added_character(self, characterName, amount, lewd, wholesome, duplicate):
-        character = (addedCharacter(characterName, amount = amount, lewd = lewd,
-                            wholesome = wholesome, duplicate = duplicate))
-        if not self.conn.check_added_character_exsits([character.name]):
-            self.conn.enter_added_new_character([character.name, character.amount, character.lewd,
-                                                character.wholesome, character.duplicate])
-        else:
-            self.conn.update_added_character_amount([character.amount, character.lewd,
-                                                character.wholesome, character.duplicate, character.name])
     
     def grab_added_character(self):
         characterInfo = self.conn.get_added_characters_table_first_name()
@@ -53,9 +42,9 @@ class dbConnection:
         character = None
         for character_sql in characterInfo:
             #Chracter(name, lewd, wholesome, duplicate, amount, url)
-            character = (addedCharacter(character_sql[0], kivy_state_to_bool(character_sql[2]), 
-                                    kivy_state_to_bool(character_sql[3]), 
-                                    kivy_state_to_bool(character_sql[4]), int(character_sql[1]), ''))
+            character = (addedCharacter(character_sql[0], bool(character_sql[2]), 
+                                    bool(character_sql[3]), 
+                                    bool(character_sql[4]), int(character_sql[1]), ''))
         return character
     
     def change_to_added_character_format_many(self, characterInfo):
@@ -108,13 +97,12 @@ class dbConnection:
     def added_character_to_suggest_list(self, character):
         self.conn.added_character_to_suggest_list([character.name, character.count])
     
-    def search_for_suggestions(self, search_text):
-        #modify for 'like' command in sqlite
-        search_text = '%' + search_text + '%'
-        return self.conn.search_for_suggestions([search_text])
     
     def grab_suggestion_list(self):
-        return self.conn.grab_suggestion_list()
+        characters = self.conn.grab_suggestion_list()
+        characters = self.change_to_character_format(characters)
+        return characters
+
 
     def check_added_characters_table_count(self):
         counts = self.conn.check_added_characters_table_count()

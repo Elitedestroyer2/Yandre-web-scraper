@@ -9,6 +9,6 @@ gui.start_app()
 
 
 '''
-multithread is working, need to modify the endding of the gif to include all threads. Need to modify 'ALL' funtionality
+multithread is working, need to modify the ending of the gif to include all threads. Need to modify 'ALL' funtionality
 
 '''

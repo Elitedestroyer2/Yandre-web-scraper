@@ -11,3 +11,16 @@ database/__pycache__/charactermanager.cpython-37.pyc
 database/__pycache__/databasecomm.cpython-37.pyc
 gui/__pycache__/gui_components.cpython-37.pyc
 
+database/__pycache__/__init__.cpython-37.pyc
+database/__pycache__/_addedCharacterTable.cpython-37.pyc
+database/__pycache__/_addedCharacterTableManager.cpython-37.pyc
+database/__pycache__/_charactersTable.cpython-37.pyc
+database/__pycache__/_charactersTableManager.cpython-37.pyc
+database/__pycache__/_databaseConnection.cpython-37.pyc
+database/__pycache__/_databaseConnectionManager.cpython-37.pyc
+database/__pycache__/_suggestionsTable.cpython-37.pyc
+database/__pycache__/_suggestionsTableManager.cpython-37.pyc
+web_scraper/__pycache__/_scraper.cpython-37.pyc
+gui/__pycache__/gui_components.cpython-37.pyc
+gui/__pycache__/gui_components.cpython-37.pyc
+gui/__pycache__/gui_components.cpython-37.pyc

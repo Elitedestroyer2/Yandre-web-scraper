@@ -3,16 +3,15 @@ from bs4 import BeautifulSoup
 import os
 import urllib.request
 import cv2
-from database import charactermanager
+from database import DbManager
 from settings import settings
 
 import concurrent.futures
+import threading
 
-MAX_PICTURES = 60
-MIN_PICTURES = 800
-mainURL = "https://yande.re/"
-sav_dir = 'CharactersForRec'
-page_counter_global =1 
+
+page_counter_global = 1
+updating_list = False
 
 
 class scraper(object):
@@ -22,12 +21,10 @@ class scraper(object):
             download_characters = {executer.submit(self.grab_pictures): 8}
 
     def grab_pictures(self):
+        global updating_list
         self.MAINURL = "https://yande.re/"
         self.sav_dir = settings.read_settings()
-
-
         self.pageCounter = 1
-        #self.character = []
 
         #create character from character class
         self.conn = self.connect_to_database()
@@ -40,7 +37,12 @@ class scraper(object):
                 break
             self.delete_added_charater_from_db()
             if self.character.name == 'ALL':
+                updating_list = True
                 self.grab_suggestion_list()
+                updating_list = False
+                break
+            while updating_list:
+                time.sleep(1)
             self.conn.close_connection()
             self.assign_filter_values(self.character)
             self.character = Character(self.character.name, self.fetch_character_url(self.character.name), self.character.amount)
@@ -76,11 +78,12 @@ class scraper(object):
         self.conn.create_added_table()
         amount, max_number, min_number = self.grab_default_values()
         for character in character_sql:
-            if character.count < min_number:
+            if character.amount < min_number:
                 pass
             else:
-                self.character.append(addedCharacter(character[0],False,True,False,amount,''))
-                self.conn.add_added_character(character)
+                character = addedCharacter(character.name,False,True,False,amount,'')
+                self.conn.add_added_character(character.name, character.amount, character.lewd,
+                                                character.wholesome, character.duplicate)
     
     def grab_default_values(self):
         amount, max_number, min_number = settings.get_default_values()
@@ -142,7 +145,10 @@ class scraper(object):
     
     def get_current_file_count(self):
         #Grab the number of files and add one to it so that the save does not overwrite the last file in the folder
-        fileCount = len(next(os.walk(self.folderPath))[2]) + 1
+        try:
+            fileCount = len(next(os.walk(self.folderPath))[2]) + 1
+        except:
+            pass
         return fileCount
 
     def ratingCheck(self, safeRating):
@@ -193,82 +199,6 @@ class scraper(object):
                 self.fileCount = self.get_current_file_count()
         else:
             self.fileCount = self.get_current_file_count()
-                
-
-    def unknown(self):
-        #Grab character name and urls for the minimum amount of pictures
-        while not grabCharacter(url)[0]:
-            tempCharacters = grabCharacter(url)[1]
-            for char in tempCharacters:
-                character.append(char)
-            pageCounter += 1
-            url = f"https://yande.re/tag?name=&order=count&page={pageCounter}&type=4" 
-        for character in character:
-            previous_page = 1
-            url_page = 1
-            job_elems, file_count, folderPath = getPage(character)
-
-            while file_count <= MAX_PICTURES:
-                previous_page = url_page
-                url_page += 1
-                character.url = character.url.replace(str(previous_page), str(url_page))
-                job_elems = getPage(character)[0]
-
-                for job_elem in job_elems:
-                    href_elem = job_elem.attrs['href']
-                    temp_url = mainURL + href_elem
-
-                    page = requests.get(temp_url)
-
-                    soup = BeautifulSoup(page.content, 'html.parser')
-                    results = soup.find(id='highres')
-                    down_link = results.attrs['href']
-                    results = soup.find(id='stats')
-                    #Grab 'safe' rating
-                    safeRating = results.contents[3].contents[9].contents[0]
-                    if filtersOn:
-                        Islewd, Iswholesome = filterChecks(safeRating)
-                        if self.toggleToBool(lewdFilter):
-                            if Islewd:
-                                pass
-                            else:
-                                continue
-                        elif self.toggleToBool(wholesomeFilter):
-                            if Iswholesome:
-                                pass
-                            else:
-                                continue
-                    else:
-                        pass
-
-                    fullfilename = os.path.join(folderPath, str(file_count) + '.jpg')
-                    urllib.request.urlretrieve(down_link, fullfilename)
-                    if self.toggleToBool(duplicateFilter):
-                        duplicated = checkForDuplicate(file_count)
-                    else:
-                        duplicated = False
-                    if not duplicated:
-                        file_count = len(next(os.walk(folderPath))[2]) + 1
-                    if file_count > MAX_PICTURES:
-                        break
-
-    def toggleToBool(self, toggleString):
-        if toggleString == 'down':
-            toggle = True
-        else:
-            toggle = False
-        return toggle
-
-
-    def filterChecks(safeRating):
-        isSafe = 'Safe' in safeRating
-        if not isSafe:
-            Lewd = True
-            Wholesome = False
-        else:
-            Lewd = False
-            Wholesome = True
-        return Lewd, Wholesome
 
     def checkForDuplicate(file_count):
         file_check_count = 1
@@ -285,55 +215,6 @@ class scraper(object):
                     return True
             file_check_count += 1
 
-    def getPage1(character):
-        page = requests.get(character.url)
-        folderPath = sav_dir + "/" + character.name
-        folderPath = folderPath.replace('_', ' ')
-        isdir = os.path.isdir(folderPath)
-
-        if not isdir:
-            try:
-                os.mkdir(folderPath)
-                file_count = 0
-            except:
-                print("Failed to create directory %s" % folderPath)
-            else:
-                print("Successfully created the directory %s" % folderPath)
-
-        elif isdir:
-            #Grab the number of files and add one to it so that the save does not overwrite the last file in the folder
-            file_count = len(next(os.walk(folderPath))[2]) + 1
-
-        soup = BeautifulSoup(page.content, 'html.parser')
-        results = soup.find(id='post-list-posts')
-        elements = results.find_all('a', class_='thumb')
-        return elements, file_count, folderPath
-
-
-def grabCharacter(url):
-    character = []
-    numbers = []
-    done = False
-
-    resultsForCharacters, numbers = pageResults(url)
-
-    for result, number in zip(resultsForCharacters, numbers):
-        #Grabs character names from the list page and puts them in a list
-        characterUrl = result.contents[3].attrs['href']
-        characterUrl = characterUrl.replace('post?', 'post?page=1&')
-        characterName = result.contents[3].contents[0]
-        character.append(Character(characterName, mainURL + characterUrl, number))
-    return done, character
-
-def pageResults(url):
-    numbers = []
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    resultsForCharacters = soup.findAll('td', class_='tag-type-character')
-    resultsForNumbers = soup.findAll('td', align ='right')
-    for result in resultsForNumbers:
-        numbers.append(result.contents[0])
-    return resultsForCharacters, numbers
     
 
 class Character:
@@ -342,18 +223,6 @@ class Character:
         self.url = url
         self.amount = amount
 
-
-
-def searchSuggest(input):
-    suggested_characters = []
-    searchUrl = f'https://yande.re/tag?name={input}&type=4&order=count'
-    grabed_characters = grabCharacter(searchUrl)[1]
-    for character in grabed_characters:
-        suggested_characters.append(character.name)
-        if len(suggested_characters) == 10:
-            break
-    grabed_characters.clear()
-    return suggested_characters
 
 class updateCollection(object):
 
@@ -436,16 +305,3 @@ class CharacterSuggestion:
     def __init__(self, name, count):
         self.name = name
         self.count = count
-
-class addedCharacter:
-    def __init__(self, name, lewd, wholesome, duplicate, amount, url=''):
-        DEFAULT_AMOUNT = 20
-        self.name = name
-        self.url = url
-        if amount == '':
-            self.amount = DEFAULT_AMOUNT
-        else:
-            self.amount = amount
-        self.lewd = lewd
-        self.wholesome = wholesome
-        self.duplicate = duplicate
