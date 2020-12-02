@@ -1,14 +1,8 @@
 from gui import gui
 from settings import settings
 
-#set up settings
+# set up settings
 settings.start_up()
 
-#start the app
+# start the app
 gui.start_app()
-
-
-'''
-multithread is working, need to modify the ending of the gif to include all threads. Need to modify 'ALL' funtionality
-
-'''

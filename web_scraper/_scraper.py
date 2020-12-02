@@ -8,6 +8,7 @@ from settings import settings
 
 import concurrent.futures
 import threading
+import time
 
 
 page_counter_global = 1

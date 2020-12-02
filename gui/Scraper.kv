@@ -1,7 +1,17 @@
 #:kivy 1.11.1
 
 #:import Factory kivy.factory.Factory
-#:import gui_comp gui.gui_components.CharacterModalView
+#:import gui_comp gui.gui_componets.saveDirectoryButton.SaveDirButton
+#:import gui_comp gui.gui_componets.characterTextInput.CharacterTextInput
+#:import gui_comp gui.gui_componets.recycleView.RV
+#:import gui_comp gui.gui_componets.selectableRecycleBoxLayout.SelectableRecycleBoxLayout
+#:import gui_comp gui.gui_componets.selectable_label.addedCharacterSelect.AddedCharacterSelect
+#:import gui_comp gui.gui_componets.selectable_label.characterSelect.CharacterSelect
+#:import gui_comp gui.gui_componets.modal_view.characterModalView.CharacterModalView
+#:import gui_comp gui.gui_componets.modal_view.collectionModalView.CollectionModalView
+#:import gui_comp gui.gui_componets.modal_view.defaultValuesModalView.DefaultValuesModalView
+#:import gui_comp gui.gui_componets.modal_view.warningModalView.WarningModalView
+#:import gui_comp gui.gui_componets.modal_view.workingModalView.WorkingModalView
 
 #:set Alabaster 247/255, 247/255, 247/255, 1
 #:set Mercury 225/255, 225/255, 225/255, 1
@@ -54,7 +64,7 @@
     cursor_width: '2sp'
     font_size: '16sp'
 
-<Blank>:
+<Blank@Label>:
     size_hint: .1, None
     text_size: self.size
     halign: 'right'
@@ -63,7 +73,7 @@
     font_size: 20
     height: 30
 
-<TabLabel>:
+<TabLabel@Label>:
     color: Mercury
     text_size: self.size
     font_size: '16sp'

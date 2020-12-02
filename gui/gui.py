@@ -2,9 +2,8 @@ import kivy
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 
-from web_scraper import _scraper
+
 import settings
-from gui import gui_components
 #from database import charactermanager
 
 import multiprocessing
@@ -12,12 +11,14 @@ import threading
 import concurrent.futures
 
 from database import DbManager
-from common import classes
+from common import CommonClasses
+from web_scraper._scraper import scraper
 
 class Launch(FloatLayout):
     def __init__(self, **kwargs):
         super(Launch, self).__init__(**kwargs)
         self.dbManager = DbManager()
+        self.commonClasses = CommonClasses()
 
     def send(self):
         #Kivy must stay on the main thread, other wise Kivy pauses
@@ -53,7 +54,7 @@ class Launch(FloatLayout):
     def add(self, characterName, amount, lewd, wholesome, duplicate):
         if characterName:
             self.connectToDatabase()
-            self.dbManager.add_added_character(characterName, amount, lewd, wholesome, duplicate)
+            self.add_added_character(characterName, amount, lewd, wholesome, duplicate)
             self.close_database()
             #reset the view
             self.reset_view()
@@ -61,13 +62,13 @@ class Launch(FloatLayout):
             pass
     
     def add_added_character(self, characterName, amount, lewd, wholesome, duplicate):
-        character = (classes.addedCharacter(characterName, amount = amount, lewd = lewd,
+        character = (self.commonClasses.addedCharacter(characterName, amount = amount, lewd = lewd,
                             wholesome = wholesome, duplicate = duplicate))
-        if not self.conn.check_added_character_exsits([character.name]):
-            self.conn.enter_added_new_character([character.name, character.amount, character.lewd,
+        if not self.dbManager.check_added_character_exsits([character.name]):
+            self.dbManager.enter_added_new_character([character.name, character.amount, character.lewd,
                                                 character.wholesome, character.duplicate])
         else:
-            self.conn.update_added_character_amount([character.amount, character.lewd,
+            self.dbManager.update_added_character_amount([character.amount, character.lewd,
                                                 character.wholesome, character.duplicate, character.name])
 
     def check_first_time_duplication(self):
@@ -131,8 +132,8 @@ class Launch(FloatLayout):
         self.t9.start()
 
     def update_suggestions_workers(self):
-        suggetions_updater = scraper.suggestionsUpdater()
-        suggetions_updater.startUp()
+        suggestions_updater = scraper.suggestionsUpdater()
+        suggestions_updater.startUp()
 
 
 class ScraperApp(App):
