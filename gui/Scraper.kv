@@ -1,17 +1,17 @@
 #:kivy 1.11.1
 
 #:import Factory kivy.factory.Factory
-#:import gui_comp gui.gui_componets.saveDirectoryButton.SaveDirButton
-#:import gui_comp gui.gui_componets.characterTextInput.CharacterTextInput
-#:import gui_comp gui.gui_componets.recycleView.RV
-#:import gui_comp gui.gui_componets.selectableRecycleBoxLayout.SelectableRecycleBoxLayout
-#:import gui_comp gui.gui_componets.selectable_label.addedCharacterSelect.AddedCharacterSelect
-#:import gui_comp gui.gui_componets.selectable_label.characterSelect.CharacterSelect
-#:import gui_comp gui.gui_componets.modal_view.characterModalView.CharacterModalView
-#:import gui_comp gui.gui_componets.modal_view.collectionModalView.CollectionModalView
-#:import gui_comp gui.gui_componets.modal_view.defaultValuesModalView.DefaultValuesModalView
-#:import gui_comp gui.gui_componets.modal_view.warningModalView.WarningModalView
-#:import gui_comp gui.gui_componets.modal_view.workingModalView.WorkingModalView
+#:import save_button gui.gui_componets.save_directory_button.SaveDirButton
+#:import character_text_input gui.gui_componets.character_text_input.CharacterTextInput
+#:import recycle_view gui.gui_componets.recycle_view.RV
+#:import selectable_recycle_box_layout gui.gui_componets.selectable_recycle_box_layout.SelectableRecycleBoxLayout
+#:import selectable_added_character gui.gui_componets.selectable_label.added_character_select.AddedCharacterSelect
+#:import selectable_character gui.gui_componets.selectable_label.character_select.CharacterSelect
+#:import character_modal_view gui.gui_componets.modal_view.character_modal_view.CharacterModalView
+#:import collection_modal_view gui.gui_componets.modal_view.collection_modal_view.CollectionModalView
+#:import default_values_modal_view gui.gui_componets.modal_view.default_values_modal_view.DefaultValuesModalView
+#:import working_modal_view gui.gui_componets.modal_view.working_modal_view.WorkingModalView
+#:import warning_modal_view gui.gui_componets.modal_view.warning_modal_view.WarningModalView
 
 #:set Alabaster 247/255, 247/255, 247/255, 1
 #:set Mercury 225/255, 225/255, 225/255, 1
@@ -146,7 +146,7 @@
                 on_release: root.dismiss()
             Button:
                 text: 'remove'
-                on_release: gui_comp.remove_character_button(charactermv)
+                on_release: character_modal_view.remove_character_button(charactermv)
 
 <CollectionModalView@ModalView>:
     size_hint: 1,1

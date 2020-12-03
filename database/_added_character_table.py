@@ -25,20 +25,13 @@ def get_added_characters_names(self):
     return self.cursor.execute('''SELECT Name FROM AddedCharacters ''')
 
 
-def get_added_entry(self):
-    characterInfo = self.cursor.execute(
-        '''SELECT * FROM AddedCharacters WHERE rowid = ? ''', self.currentId)
-    self.currentId[0] += 1
-    return characterInfo
-
-
 def get_added_characters_table(self):
     return self.cursor.execute('''SELECT * FROM AddedCharacters ''')
 
 
 def delete_added_character(self, character):
     self.cursor.execute(
-        '''DELETE FROM AddedCharacters WHERE Name=? ''', character)
+        '''DELETE FROM AddedCharacters WHERE Name=? ''', [character])
     self.conn.commit()
 
 
@@ -51,7 +44,7 @@ def create_added_table(self):
         '''CREATE TABLE AddedCharacters(Name, Amount, Lewd, Wholesome, Duplicate)''')
 
 
-def get_added_characters_table_first_name(self):
+def get_added_character(self):
     return self.cursor.execute('''SELECT * FROM AddedCharacters ORDER BY ROWID ASC LIMIT 1 ''')
 
 

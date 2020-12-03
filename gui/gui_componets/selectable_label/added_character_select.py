@@ -1,4 +1,4 @@
-from ._selectableLabel import SelectableLabel
+from ._selectable_label import SelectableLabel
 
 
 class AddedCharacterSelect(SelectableLabel):

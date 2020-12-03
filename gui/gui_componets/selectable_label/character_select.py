@@ -1,7 +1,7 @@
 from kivy.app import App
 
 from .._common_functions import hide_widget
-from ._selectableLabel import SelectableLabel
+from ._selectable_label import SelectableLabel
 
 
 class CharacterSelect(SelectableLabel):

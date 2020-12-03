@@ -1,4 +1,5 @@
 from kivy.uix.recycleview import RecycleView
+
 from ._common_functions import hide_widget
 
 

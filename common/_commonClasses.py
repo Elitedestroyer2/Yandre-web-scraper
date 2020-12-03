@@ -1,5 +1,4 @@
-
-class addedCharacter:
+class AddedCharacter:
     def __init__(self, name, amount, lewd, wholesome, duplicate, url=''):
         DEFAULT_AMOUNT = 20
         self.name = name
@@ -12,7 +11,19 @@ class addedCharacter:
         self.wholesome = wholesome
         self.duplicate = duplicate
 
-class character:
+
+class Character:
     def __init__(self, name, amount):
         self.name = name
+        self.amount = amount
+
+class CharacterSuggestion:
+    def __init__(self, name, count):
+        self.name = name
+        self.count = count
+
+class PageCharacter:
+    def __init__(self, name, url='', amount=20):
+        self.name = name
+        self.url = url
         self.amount = amount

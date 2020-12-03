@@ -1,9 +1,9 @@
 
 from common import CommonClasses
 from database import DbManager
-from .._common_functions import hide_widget
 
-from ._baseCharacterModalView import BaseCharacterModalView
+from .._common_functions import hide_widget
+from ._base_character_modal_view import BaseCharacterModalView
 
 
 class CharacterModalView(BaseCharacterModalView):
@@ -28,7 +28,7 @@ class CharacterModalView(BaseCharacterModalView):
     @staticmethod
     def convert_to_character_class(character):
         #Name, Amount, Lewd, Wholesome, Duplicate
-        character = CommonClasses.addedCharacter(
+        character = CommonClasses.AddedCharacter(
             character[0], character[1], character[2], character[3], character[4])
         return character
 
@@ -49,7 +49,7 @@ class CharacterModalView(BaseCharacterModalView):
         return string
 
     def remove_character(self, characterName):
-        self.dbManager.remove_added_character(characterName)
+        self.dbManager.delete_added_character(characterName)
 
     def remove_character_button(self):
         self.create_connection()

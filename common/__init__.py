@@ -1,2 +1,2 @@
 class CommonClasses(object):
-    from ._commonClasses import addedCharacter, character
+    from ._commonClasses import AddedCharacter, Character, CharacterSuggestion, PageCharacter

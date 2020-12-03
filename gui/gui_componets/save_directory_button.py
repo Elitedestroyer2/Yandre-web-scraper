@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 
-import settings
+from settings import settings
 from kivy.uix.button import Button
 
 
