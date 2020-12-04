@@ -1,6 +1,6 @@
 
-def check_added_character_exsits(self, characterName):
-    # See if character's name exsits
+def check_added_character_exists(self, characterName):
+    # See if character's name exists
     self.cursor.execute(
         '''SELECT count(Name) FROM AddedCharacters WHERE Name=? ''', characterName)
     if self.cursor.fetchone()[0] == 1:
@@ -15,7 +15,7 @@ def enter_added_new_character(self, character):
     self.conn.commit()
 
 
-def update_added_character_amount(self, character):
+def update_added_character(self, character):
     self.cursor.execute(
         '''UPDATE AddedCharacters SET Amount=?, Lewd=?, Wholesome=?, Duplicate=? WHERE Name=? ''', character)
     self.conn.commit()

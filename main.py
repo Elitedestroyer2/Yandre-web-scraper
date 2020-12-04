@@ -7,5 +7,4 @@ settings.start_up()
 # start the app
 gui.start_app()
 
-
-# TODO: add a default selection for adding characters. Maybe visually show it in the menu as well.
+# TODO: Fix all the guis by import correctly, such as the deafult values module

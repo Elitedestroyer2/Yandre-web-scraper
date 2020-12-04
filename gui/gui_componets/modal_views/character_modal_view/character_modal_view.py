@@ -1,9 +1,8 @@
-
 from common import CommonClasses
 from database import DbManager
 
-from .._common_functions import hide_widget
-from ._base_character_modal_view import BaseCharacterModalView
+from ..._common_functions import hide_widget
+from .._base_character_modal_view import BaseCharacterModalView
 
 
 class CharacterModalView(BaseCharacterModalView):
@@ -29,7 +28,7 @@ class CharacterModalView(BaseCharacterModalView):
     def convert_to_character_class(character):
         #Name, Amount, Lewd, Wholesome, Duplicate
         character = CommonClasses.AddedCharacter(
-            character[0], character[1], character[2], character[3], character[4])
+            character[0], character[1], kivy_to_bool(character[2]), kivy_to_bool(character[3]), kivy_to_bool(character[4]))
         return character
 
     def create_string_for_added_character_list(self, character):
@@ -71,3 +70,9 @@ class CharacterModalView(BaseCharacterModalView):
                 self.ids.character_list.data[node]['text']).split(',', 1)
             characters_to_remove.append(character_to_remove[0])
         return characters_to_remove
+
+def kivy_to_bool(string):
+    if string == 'down':
+        return True
+    else:
+        return False

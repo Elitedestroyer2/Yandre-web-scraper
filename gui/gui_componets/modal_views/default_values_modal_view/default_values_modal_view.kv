@@ -1,0 +1,75 @@
+#:import DefaMV gui.gui_componets.modal_views.default_values_modal_view.default_values_modal_view.DefaultValuesModalView
+
+<DefaultValuesModalView@ModalView>:
+    size_hint: 1,1
+    auto_dismiss: False
+    id: default_values_mv
+    on_pre_open: root.start_up()
+
+    GridLayout:
+        cols: 3
+        size_hint: .8, .85
+        padding: 10, 10
+        canvas.before:
+            Color:
+                rgba: Mine_Shaft_Dark
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        TabLabel:
+            text: 'Default Amount'
+        Blank:
+        TabLabel:
+            text: 'Max Amount for collection'
+        TextInput:
+            id: default_amount_text_input
+            input_filter: 'int'
+        Blank:
+        TextInput:
+            id: max_amount_for_collection_text_input
+            input_filter: 'int'
+        Blank:
+        Blank:
+        Blank:
+        TabLabel:
+            text: 'Min Amount needed to download'
+        Blank:
+        TabLabel:
+            text: 'Default Extra Filters'
+        TextInput:
+            id: min_amount_of_pics_required_to_start_download_text_input
+            input_filter: 'int'
+        Blank:
+        ToggleButton:
+            text: 'Duplication Check'
+            id: duplication
+        Blank:
+        Blank:
+        Blank:
+        TabLabel:
+            text: 'Default Filters'
+        Blank:
+        Blank:
+        ToggleButton:
+            text: 'Lewd Only'
+            id: lewd
+            group: 'default_filters'
+        Blank:
+        Blank:
+        ToggleButton:
+            text: 'Wholesome Only'
+            id: wholesome
+            group: 'default_filters'
+            
+
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size: self.parent.size
+        pos: self.parent.pos
+        Button:
+            text: 'Close'
+            on_release: root.dismiss()
+        Button:
+            text: 'Apply'
+            on_release: root.apply_changes()

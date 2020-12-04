@@ -1,0 +1,24 @@
+<CharacterModalView@ModalView>:
+    size_hint: 1,1
+    auto_dismiss: False
+    on_pre_open: root.start_up()
+    background: 'gui/Images/3.jpg'
+    id: charactermv
+
+    BoxLayout:
+        orientation: 'vertical'
+        RV:
+            id: character_list
+            size_hint: 1, 1
+            viewclass: 'AddedCharacterSelect'
+            SelectableRecycleBoxLayout:
+            
+        BoxLayout:
+            size_hint: 1, .05
+            orientation: 'horizontal'
+            Button: 
+                text: 'close'
+                on_release: root.dismiss()
+            Button:
+                text: 'remove'
+                on_release: character_modal_view.remove_character_button(charactermv)

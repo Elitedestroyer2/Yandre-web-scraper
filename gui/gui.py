@@ -16,7 +16,9 @@ from web_scraper import scraper
 
 from web_scraper.scrapper_support import CharacterDbManager
 import os
-from gui.gui_componets.modal_view.working_modal_view import WorkingModalView
+from gui.gui_componets.modal_views.working_modal_view.working_modal_view import WorkingModalView
+from gui.gui_componets.modal_views.warning_modal_view.warning_modal_view import WarningModalView
+
 
 class Launch(FloatLayout):
     def __init__(self, **kwargs):
@@ -24,9 +26,25 @@ class Launch(FloatLayout):
         self.dbManager = DbManager()
         self.characterDbManager = CharacterDbManager()
         self.commonClasses = CommonClasses()
+        self.grab_default_values()
+
+    def grab_default_values(self):
+        self.default_values = settings.get_default_values()
+
+    def wholesome_toggle_init(self):
+        wholesome = settings.get_default_values().wholesome
+        return wholesome
+
+    def lewd_toggle_init(self):
+        lewd = settings.get_default_values().lewd
+        return lewd
+
+    def duplication_toggle_init(self):
+        duplication = settings.get_default_values().duplication
+        return duplication
 
     def send(self):
-        #Kivy must stay on the main thread, other wise Kivy pauses
+        # Kivy must stay on the main thread, other wise Kivy pauses
         self.check_if_all()
         self.start_gif()
         self.t2 = threading.Thread(target=self.download)
@@ -51,7 +69,7 @@ class Launch(FloatLayout):
                 character = CommonClasses.AddedCharacter(
                     character[0], False, True, False, amount, '')
                 self.dbManager.enter_added_new_character([character.name, character.amount, character.lewd,
-                                                character.wholesome, character.duplicate])
+                                                          character.wholesome, character.duplicate])
         self.dbManager.close_connection()
 
     def check_if_all(self):
@@ -62,12 +80,12 @@ class Launch(FloatLayout):
             character = c
         if character[0] == 'ALL':
             self.grab_suggestion_list()
-        
+
     def download(self):
-        #if not hasattr(self, 'scrap'):
+        # if not hasattr(self, 'scrap'):
         #    self.scrap = scraper.scraper()
-        #self.scrap.grab_pictures()
-        #self.scrap.start_threads()
+        # self.scrap.grab_pictures()
+        # self.scrap.start_threads()
         scrap = scraper.scraper()
         scrap.grab_pictures()
 
@@ -83,40 +101,40 @@ class Launch(FloatLayout):
 
     def add(self, characterName, amount, lewd, wholesome, duplicate):
         if characterName:
-            self.connectToDatabase()
-            self.add_added_character(characterName, amount, lewd, wholesome, duplicate)
-            self.close_database()
-            #reset the view
+            self.add_added_character(
+                characterName, amount, lewd, wholesome, duplicate)
+            # reset the view
             self.reset_view()
         else:
             pass
-    
+
     def add_added_character(self, characterName, amount, lewd, wholesome, duplicate):
-        character = (self.commonClasses.AddedCharacter(characterName, amount = amount, lewd = lewd,
-                            wholesome = wholesome, duplicate = duplicate))
-        if not self.dbManager.check_added_character_exsits([character.name]):
+        character = (self.commonClasses.AddedCharacter(characterName, amount=amount, lewd=lewd,
+                                                       wholesome=wholesome, duplicate=duplicate))
+        self.connectToDatabase()
+        if not self.dbManager.check_added_character_exists([character.name]):
             self.dbManager.enter_added_new_character([character.name, character.amount, character.lewd,
-                                                character.wholesome, character.duplicate])
+                                                      character.wholesome, character.duplicate])
         else:
-            self.dbManager.update_added_character_amount([character.amount, character.lewd,
-                                                character.wholesome, character.duplicate, character.name])
+            self.dbManager.update_added_character([character.amount, character.lewd,
+                                                          character.wholesome, character.duplicate, character.name])
+        self.close_database()
 
     def check_first_time_duplication(self):
         if settings.settings.get_first_duplication():
             warning_text = 'This will dramatically increase the time to download pictures!!!'
-            self.warning = gui_components.WarningModalView()
+            self.warning = WarningModalView()
             self.warning.ids.warning_label.text = warning_text
             self.warning.open()
             settings.settings.first_duplication_warning_done()
 
-
     def reset_view(self):
         App.get_running_app().root.ids.search_box.text = ''
         App.get_running_app().root.ids.amount.text = ''
-        App.get_running_app().root.ids.lewd.state = 'normal'
-        App.get_running_app().root.ids.wholesome.state = 'normal'
-        App.get_running_app().root.ids.duplication.state = 'normal'
-        
+        App.get_running_app().root.ids.lewd.state = self.default_values.lewd
+        App.get_running_app().root.ids.wholesome.state = self.default_values.wholesome
+        App.get_running_app().root.ids.duplication.state = self.default_values.duplication
+
     def connectToDatabase(self):
         self.dbManager.create_connection()
 
@@ -146,10 +164,10 @@ class Launch(FloatLayout):
             amount_of_pics_in_folder = len(next(os.walk(folder_path))[2])
             self.dbManager.add_character(folder, amount_of_pics_in_folder)
         self.close_database()
-        
+
     def sav_dir_warning(self):
         warning_text = 'Please choose a save directory!'
-        self.warning = gui_components.WarningModalView()
+        self.warning = WarningModalView()
         self.warning.ids.warning_label.text = warning_text
         self.warning.open()
 
@@ -182,8 +200,10 @@ class ScraperApp(App):
     def build(self):
         return Launch()
 
+
 def start_app():
     ScraperApp().run()
+
 
 if __name__ == '__main__':
     ScraperApp().run()

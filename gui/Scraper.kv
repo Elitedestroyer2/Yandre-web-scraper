@@ -1,264 +1,53 @@
 #:kivy 1.11.1
 
+#import style only modules
+#:include gui/gui_componets/shared_kivy_componets/blank.kv
+#:include gui/gui_componets/shared_kivy_componets/colors.kv
+#:include gui/gui_componets/shared_kivy_componets/tab_label.kv
+#:include gui/gui_componets/shared_kivy_componets/button.kv
+#:include gui/gui_componets/shared_kivy_componets/input_box.kv
+#:include gui/gui_componets/shared_kivy_componets/label.kv
+#:include gui/gui_componets/shared_kivy_componets/text_input.kv
+#:include gui/gui_componets/shared_kivy_componets/toggle_button.kv
+
+#import character text input
+#:include gui/gui_componets/character_text_input/character_text_input.kv
+#:import CTI gui.gui_componets.character_text_input.character_text_input.CharacterTextInput
+
+#import recycle view
+#:include gui/gui_componets/recycle_view/recycle_view.kv
+#:import RV gui.gui_componets.recycle_view.recycle_view.RV
+
+#import selectable recycle box layout
+#:include gui/gui_componets/selectable_recycle_box/selectable_recycle_box_layout.kv
+#:import SRBL gui.gui_componets.selectable_recycle_box.selectable_recycle_box_layout.SelectableRecycleBoxLayout
+
+#import selectable labels for the selectable recycle box layout
+#:import SLCS gui.gui_componets.selectable_labels.character_select.CharacterSelect
+#:import SLACS gui.gui_componets.selectable_labels.added_character_select.AddedCharacterSelect
+
+#import all modal views
+#charcter
+#:include gui/gui_componets/modal_views/character_modal_view/character_modal_view.kv
+#:import CharMV gui.gui_componets.modal_views.character_modal_view.character_modal_view.CharacterModalView
+
+#collection
+#:include gui/gui_componets/modal_views/collection_modal_view/collection_modal_view.kv
+#:import CollMV gui.gui_componets.modal_views.collection_modal_view.collection_modal_view.CollectionModalView
+
+#default values
+#:include gui/gui_componets/modal_views/default_values_modal_view/default_values_modal_view.kv
+
+#warning
+#:include gui/gui_componets/modal_views/warning_modal_view/warning_modal_view.kv
+#:import WarnMV gui.gui_componets.modal_views.warning_modal_view.warning_modal_view.WarningModalView
+
+#working
+#:include gui/gui_componets/modal_views/working_modal_view/working_modal_view.kv
+#:import WorkMV gui.gui_componets.modal_views.working_modal_view.working_modal_view.WorkingModalView
+
 #:import Factory kivy.factory.Factory
 #:import save_button gui.gui_componets.save_directory_button.SaveDirButton
-#:import character_text_input gui.gui_componets.character_text_input.CharacterTextInput
-#:import recycle_view gui.gui_componets.recycle_view.RV
-#:import selectable_recycle_box_layout gui.gui_componets.selectable_recycle_box_layout.SelectableRecycleBoxLayout
-#:import selectable_added_character gui.gui_componets.selectable_label.added_character_select.AddedCharacterSelect
-#:import selectable_character gui.gui_componets.selectable_label.character_select.CharacterSelect
-#:import character_modal_view gui.gui_componets.modal_view.character_modal_view.CharacterModalView
-#:import collection_modal_view gui.gui_componets.modal_view.collection_modal_view.CollectionModalView
-#:import default_values_modal_view gui.gui_componets.modal_view.default_values_modal_view.DefaultValuesModalView
-#:import working_modal_view gui.gui_componets.modal_view.working_modal_view.WorkingModalView
-#:import warning_modal_view gui.gui_componets.modal_view.warning_modal_view.WarningModalView
-
-#:set Alabaster 247/255, 247/255, 247/255, 1
-#:set Mercury 225/255, 225/255, 225/255, 1
-#:set Alto 207/255, 207/255, 207/255, 1
-#:set Silver_Chalice 177/255, 177/255, 177/255, 1
-#:set Silver_Chalice_Dark 158/255, 158/255, 158/255, 1
-#:set Gray 126/255, 126/255, 126/255, 1
-#:set Dove_Gray 98/255, 98/255, 98/255, 1
-#:set Emperor 81/255, 81/255, 81/255, 1
-#:set Mine_Shaft 59/255, 59/255, 59/255, 1
-#:set Mine_Shaft_Dark 34/255, 34/255, 34/255, 1
-#:set Mine_Shaft_Dark_Transparent 34/255, 34/255, 34/255, .5
-#:set Dark_Gray 7/255, 7/255, 7/255, 1
-#:set toggle True
-
-<ToggleButton>:
-    size_hint: 1, None
-    height: 30
-    text_size: self.size
-    halign: 'center'
-    valign: 'center'
-
-<Button>:
-    size_hint: 1,None
-    height: 35
-    valign: 'center'
-    padding_y: 10
-    background_color: Silver_Chalice_Dark
-    background_down: 'atlas://gui/images/myatlas/button-down'
-
-<Label>:
-    size_hint: .3, None
-    height: 30
-    color: Mercury
-    text_size: self.size
-    halign: 'center'
-    valign: 'center'
-    font_size: '16sp'
-
-<TextInput>:
-    size_hint: 1, None
-    height: 30
-    multiline: False
-    halign: 'center'
-    padding_x: 10
-    background_color: Gray
-    hint_text_color: Silver_Chalice
-    foreground_color: Mercury
-    cursor_color: Mine_Shaft
-    cursor_width: '2sp'
-    font_size: '16sp'
-
-<Blank@Label>:
-    size_hint: .1, None
-    text_size: self.size
-    halign: 'right'
-    valign: 'center'
-    padding_x: 10
-    font_size: 20
-    height: 30
-
-<TabLabel@Label>:
-    color: Mercury
-    text_size: self.size
-    font_size: '16sp'
-    padding_x: 5
-    valign: 'center'
-    canvas.before:
-        Color:
-            rgba: Dark_Gray
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-<InputBox>:
-    multiline: False
-    halign: 'center'
-    size_hint_y: None
-    height: 30
-
-<CharacterTextInput>:
-    hint_text: 'Hatsune_miku'
-    multiline: False
-    halign: 'center'
-    size_hint_y: None
-    height: 30
-    foreground_color: Mercury
-    cursor_color: Mine_Shaft
-    cursor_width: '2sp'
-
-
-<SelectableLabel>:
-    # Draw a background to indicate selection
-    canvas.before:
-        Color:
-            rgba: (.0, .6, .4, 1) if self.selected else (0, 0, 0, 1)
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-<SelectableRecycleBoxLayout>:
-    size_hint: 1, None
-    default_size: None, dp(32)
-    default_size_hint: 1, None
-    height: self.minimum_height
-    orientation: 'vertical'
-    multiselect: True
-    touch_multiselect: True
-
-<RV>:
-
-<CharacterModalView@ModalView>:
-    size_hint: 1,1
-    auto_dismiss: False
-    on_pre_open: root.start_up()
-    background: 'gui/Images/3.jpg'
-    id: charactermv
-
-    BoxLayout:
-        orientation: 'vertical'
-        RV:
-            id: character_list
-            size_hint: 1, 1
-            viewclass: 'AddedCharacterSelect'
-            SelectableRecycleBoxLayout:
-            
-        BoxLayout:
-            size_hint: 1, .05
-            orientation: 'horizontal'
-            Button: 
-                text: 'close'
-                on_release: root.dismiss()
-            Button:
-                text: 'remove'
-                on_release: character_modal_view.remove_character_button(charactermv)
-
-<CollectionModalView@ModalView>:
-    size_hint: 1,1
-    auto_dismiss: False
-    on_pre_open: root.start_up()
-    background: 'gui/Images/3.jpg'
-
-    BoxLayout:
-        orientation: 'vertical'
-        RV:
-            id: collection_list
-            size_hint: 1, 1
-        BoxLayout:
-            size_hint: 1, .05
-            orientation: 'horizontal'
-            Button: 
-                text: 'close'
-                on_release: root.dismiss()
-
-<WarningModalView@ModalView>:
-    size_hint: .5,.5
-    auto_dismiss: False
-    background_color: Mine_Shaft_Dark_Transparent
-    background: 'gui/Images/1.png'
-
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'center'
-
-        Label:
-            size_hint: .75, .75
-            padding_x: 10
-            id: warning_label
-            bold: 'True'
-            canvas.before:
-                Color:
-                    rgba: Emperor
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-    BoxLayout:
-        orientation: 'horizontal'
-        size: self.parent.size
-        pos: self.parent.pos
-        Button:
-            text: 'Ok'
-            on_release: root.dismiss()
-
-<WorkingModalView@ModalView>:
-    size_hint: 1,1
-    auto_dismiss: False
-    id: loading_mv
-
-    Image:
-        id: gif
-        source: 'gui/Images/Aqua_frog.gif'
-        center: self.parent.center
-        size_hint: 1, 1
-        allow_stretch: True
-        anim_delay: .1
-        anim_loop: 0
-
-<DefaultValuesModalView@ModalView>:
-    size_hint: 1,1
-    auto_dismiss: False
-    id: default_values_mv
-    on_pre_open: root.start_up()
-
-    GridLayout:
-        cols: 3
-        size_hint: .8, .85
-        padding: 10, 10
-        canvas.before:
-            Color:
-                rgba: Mine_Shaft_Dark
-            Rectangle:
-                pos: self.pos
-                size: self.size
-        TabLabel:
-            text: 'Default Amount'
-        Blank:
-        TabLabel:
-            text: 'Max Amount for collection'
-        TextInput:
-            id: default_amount_text_input
-            input_filter: 'int'
-        Blank:
-        TextInput:
-            id: max_amount_for_collection_text_input
-            input_filter: 'int'
-        Blank:
-        Blank:
-        Blank:
-        TabLabel:
-            text: 'Min Amount needed to download'
-        Blank:
-        Blank:
-        TextInput:
-            id: min_amount_of_pics_required_to_start_download_text_input
-            input_filter: 'int'
-
-    BoxLayout:
-        orientation: 'horizontal'
-        size: self.parent.size
-        pos: self.parent.pos
-        Button:
-            text: 'Close'
-            on_release: root.dismiss()
-        Button:
-            text: 'Apply'
-            on_release: root.apply_changes()
 
 
 <Launch>:
@@ -313,15 +102,18 @@
             ToggleButton:
                 text: 'Lewd Only'
                 id: lewd
+                state: root.lewd_toggle_init()
                 group: 'filters'
             Blank:
             ToggleButton:
                 text: 'Duplication Check'
                 id: duplication
+                state: root.duplication_toggle_init()
                 on_release: root.check_first_time_duplication()
             ToggleButton:
                 text: 'Wholesome Only'
                 id: wholesome
+                state: root.wholesome_toggle_init()
                 group: 'filters'
             Blank:
             Blank:

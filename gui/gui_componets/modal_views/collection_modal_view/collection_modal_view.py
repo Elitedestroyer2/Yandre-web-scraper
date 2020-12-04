@@ -1,8 +1,8 @@
 from common import CommonClasses
 from database import DbManager
 
-from .._common_functions import hide_widget
-from ._base_character_modal_view import BaseCharacterModalView
+from ..._common_functions import hide_widget
+from .._base_character_modal_view import BaseCharacterModalView
 
 
 class CollectionModalView(BaseCharacterModalView):

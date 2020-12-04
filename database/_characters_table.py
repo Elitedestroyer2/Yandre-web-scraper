@@ -1,5 +1,5 @@
 
-def check_character_exsits(self, characterName):
+def check_character_exists(self, characterName):
     #See if character's name exsits
     self.cursor.execute('''SELECT count(Name) FROM Characters WHERE Name=? ''', characterName)
     if self.cursor.fetchone()[0] == 1:

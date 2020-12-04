@@ -1,0 +1,17 @@
+<CollectionModalView@ModalView>:
+    size_hint: 1,1
+    auto_dismiss: False
+    on_pre_open: root.start_up()
+    background: 'gui/Images/3.jpg'
+
+    BoxLayout:
+        orientation: 'vertical'
+        RV:
+            id: collection_list
+            size_hint: 1, 1
+        BoxLayout:
+            size_hint: 1, .05
+            orientation: 'horizontal'
+            Button: 
+                text: 'close'
+                on_release: root.dismiss()

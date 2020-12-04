@@ -1,10 +1,11 @@
+from settings import settings
+
 class AddedCharacter:
     def __init__(self, name, amount, lewd, wholesome, duplicate, url=''):
-        DEFAULT_AMOUNT = 20
         self.name = name
         self.url = url
         if amount == '':
-            self.amount = DEFAULT_AMOUNT
+            self.amount = get_default_amount()
         else:
             self.amount = amount
         self.lewd = lewd
@@ -27,3 +28,9 @@ class PageCharacter:
         self.name = name
         self.url = url
         self.amount = amount
+
+
+# Support Functions
+
+def get_default_amount():
+    return settings.get_default_values().amount

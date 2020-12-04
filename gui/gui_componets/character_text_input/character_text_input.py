@@ -2,7 +2,7 @@ from database import DbManager
 from kivy.app import App
 from kivy.uix.textinput import TextInput
 
-from ._common_functions import hide_widget
+from .._common_functions import hide_widget
 
 
 class CharacterTextInput(TextInput):
