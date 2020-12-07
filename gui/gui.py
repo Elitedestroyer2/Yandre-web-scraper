@@ -48,13 +48,13 @@ class Launch(FloatLayout):
         self.check_if_all()
         self.start_gif()
         self.t2 = threading.Thread(target=self.download)
-        self.t3 = threading.Thread(target=self.download)
-        self.t4 = threading.Thread(target=self.download)
-        self.t5 = threading.Thread(target=self.download)
+        #self.t3 = threading.Thread(target=self.download)
+        #self.t4 = threading.Thread(target=self.download)
+        #self.t5 = threading.Thread(target=self.download)
         self.t2.start()
-        self.t3.start()
-        self.t4.start()
-        self.t5.start()
+        #self.t3.start()
+        #self.t4.start()
+        #self.t5.start()
 
     def grab_suggestion_list(self):
         self.dbManager.create_connection()
@@ -121,12 +121,12 @@ class Launch(FloatLayout):
         self.close_database()
 
     def check_first_time_duplication(self):
-        if settings.settings.get_first_duplication():
+        if settings.get_first_duplication():
             warning_text = 'This will dramatically increase the time to download pictures!!!'
             self.warning = WarningModalView()
             self.warning.ids.warning_label.text = warning_text
             self.warning.open()
-            settings.settings.first_duplication_warning_done()
+            settings.first_duplication_warning_done()
 
     def reset_view(self):
         App.get_running_app().root.ids.search_box.text = ''

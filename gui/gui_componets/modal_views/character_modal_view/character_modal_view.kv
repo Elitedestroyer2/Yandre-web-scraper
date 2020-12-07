@@ -1,3 +1,8 @@
+#:import CharMV gui.gui_componets.modal_views.character_modal_view.character_modal_view.CharacterModalView
+
+#:include gui/gui_componets/recycle_view/recycle_view.kv
+#:include gui/gui_componets/selectable_recycle_box/selectable_recycle_box_layout.kv 
+
 <CharacterModalView@ModalView>:
     size_hint: 1,1
     auto_dismiss: False
@@ -21,4 +26,4 @@
                 on_release: root.dismiss()
             Button:
                 text: 'remove'
-                on_release: character_modal_view.remove_character_button(charactermv)
+                on_release: root.remove_character_button()
