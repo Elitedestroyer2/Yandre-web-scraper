@@ -9,7 +9,8 @@ def get_current_file_count(self):
 
 
 def checkCharacterDir(self):
-    self.folderPath = self.sav_dir + "/" + self.character.name
+    character_name = self.character.name.replace('/', '.')
+    self.folderPath = self.sav_dir + "/" + character_name
     isdir = os.path.isdir(self.folderPath)
 
     if not isdir:

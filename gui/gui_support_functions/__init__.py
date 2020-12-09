@@ -44,7 +44,7 @@ class MainPage(FloatLayout):
                 break
 
     def sav_dir_check(self):
-        if settings.settings.read_settings() != '':
+        if settings.read_settings() != '':
             return True
         else:
             return False

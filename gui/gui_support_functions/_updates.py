@@ -10,7 +10,7 @@ def update_collection_check(self):
         self.sav_dir_warning()
 
 def update_collection(self):
-    self.connectToDatabase()
+    self.dbManager.create_connection()
     self.sav_dir = settings.read_settings()
     list_folders = os.listdir(self.sav_dir)
     self.dbManager.delete_table()
@@ -19,12 +19,12 @@ def update_collection(self):
         folder_path = self.get_folder_path(self.sav_dir, folder)
         amount_of_pics_in_folder = len(next(os.walk(folder_path))[2])
         self.dbManager.add_character(folder, amount_of_pics_in_folder)
-    self.close_database()
+    self.dbManager.close_connection()
 
 def update_suggestions(self):
     self.suggestionUpdater.reset_suggestion_table()
-    self.updater_thread = threading.Thread(target=self.mainPageSuggestionsUpdater.start_threads)
+    self.download_thread = threading.Thread(target=self.mainPageSuggestionsUpdater.start_threads)
     self.check_thread = threading.Thread(target=self.check_if_done)
-    self.check_thread
-    self.updater_thread.start()
     self.start_gif()
+    self.download_thread.start()
+    self.check_thread.start()
