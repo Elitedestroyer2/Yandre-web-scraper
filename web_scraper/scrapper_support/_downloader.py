@@ -1,5 +1,6 @@
 import os
 import urllib
+from .duplication_check import checkForDuplicate
 
 def download_pictures(self, file_count, stop_amount, folder_path):
     self.file_count = file_count
@@ -35,13 +36,10 @@ def download(self, download_link):
         self.folder_path, str(self.file_count) + '.jpg')
     urllib.request.urlretrieve(download_link, fullfilename)
     if self.character.duplicate:
-        #TODO check for duplicate
+        if checkForDuplicate(self.file_count, self.folder_path):
+            self.file_count -= 1
+        else:
             self.file_count += 1
     else:
         self.file_count += 1
 
-
-def checkForDuplicate():
-    pass
-
-    # TODO implament

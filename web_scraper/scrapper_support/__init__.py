@@ -37,3 +37,11 @@ class DownloadManager(object):
         self.filterManager = FilterManager(character)
 
     from ._downloader import (download_pictures, download)
+
+class SuggestionUpdater(object):
+    def __init__(self):
+        self.dbManager = DbManager()
+
+    from ._suggestions_updater import (start_up, reset_suggestion_table,
+        grab_character_names_and_counts, grab_html_data, add_characters_to_suggestions,
+        increment_page_counter, add_characters_to_suggestions)

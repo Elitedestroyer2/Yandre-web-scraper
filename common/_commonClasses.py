@@ -7,7 +7,7 @@ class AddedCharacter:
         if amount == '':
             self.amount = get_default_amount()
         else:
-            self.amount = amount
+            self.amount = int(amount)
         self.lewd = lewd
         self.wholesome = wholesome
         self.duplicate = duplicate

@@ -42,11 +42,16 @@
 #working
 #:include gui/gui_componets/modal_views/working_modal_view/working_modal_view.kv
 
+#import gui support functions
+#:import wholesome_check gui.gui_support_functions.initiation.wholesome_toggle_init
+#:import lewd_check gui.gui_support_functions.initiation.lewd_toggle_init
+#:import duplication_check gui.gui_support_functions.initiation.duplication_toggle_init
+
 #:import Factory kivy.factory.Factory
 #:import save_button gui.gui_componets.save_directory_button.SaveDirButton
 
 
-<Launch>:
+<MainPage>:
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'center'
@@ -98,18 +103,18 @@
             ToggleButton:
                 text: 'Lewd Only'
                 id: lewd
-                state: root.lewd_toggle_init()
+                state: lewd_check()
                 group: 'filters'
             Blank:
             ToggleButton:
                 text: 'Duplication Check'
                 id: duplication
-                state: root.duplication_toggle_init()
+                state: duplication_check()
                 on_release: root.check_first_time_duplication()
             ToggleButton:
                 text: 'Wholesome Only'
                 id: wholesome
-                state: root.wholesome_toggle_init()
+                state: wholesome_check()
                 group: 'filters'
             Blank:
             Blank:
@@ -129,7 +134,7 @@
                 on_release: Factory.CollectionModalView().open()
             Button:
                 text: 'Update collection'
-                on_release: root.update_collection()
+                on_release: root.update_collection_check()
             Blank:
             Button:
                 text: 'Show added characters'

@@ -13,7 +13,7 @@ class scraper(object):
 
     # not in use
     def start_threads(self):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executer:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executer:
             download_characters = {executer.submit(self.start_download, character): character for character in self.characters}
 
     def grab_pictures(self):
@@ -21,51 +21,39 @@ class scraper(object):
         self.sav_dir = settings.read_settings()
         self.pageCounter = 1
 
-        # create character from character class
-        self.initialize_managers()
+        self.dbManager = CharacterDbManager()
         self.dbManager.update_collection()
         self.characters = self.dbManager.grab_added_character_table()
+        self.characters = self.change_kivy_to_bool(self.characters)
         self.dbManager.create_connection()
         self.dbManager.delete_added_table()
         self.dbManager.create_added_table()
         self.dbManager.close_connection()
-        #self.start_threads()
-        self.start_download(self.characters[0])
+        self.start_threads()
 
+
+    def change_kivy_to_bool(self, characters_sql):
+        characters = []
+        for character in characters_sql:
+            if character.lewd == 'down':
+                character.lewd = True
+            else:
+                character.lewd = False
+            if character.wholesome == 'down':
+                character.wholesome = True
+            else:
+                character.wholesome = False
+            if character.duplicate == 'down':
+                character.duplicate = True
+            else:
+                character.duplicate = False
+            characters.append(character)
+        return characters
 
     def start_download(self, character):
         downloader = Downloader(character)
         downloader.download()
 
-        # old working solution:
-        '''
-        while not self.table_empty():
-            self.dbManager.grab_added_character()
-            if self.character == None:
-                break
-            self.dbManager.delete_added_charater_from_db()
-            self.character = commonClasses.pageCharacter(self.character.name, self.pageManager.set_character_url(
-                self.character.name), self.character.amount)
-            # ? is this even need?
-            self.filterManager.assign_filter_values()
-            # check if directory exists, if not create one.
-            self.fileManager.checkCharacterDir()
-            self.fileManager.get_current_file_count()
-            self.stopAmount = self.character.amount + self.fileCount
-            self.downloadManager.download_pictures()
-            self.dbManager.update_database()
-            self.dbManager.update_collection()
-            '''
-
-    def initialize_managers(self):
-
-
-        self.dbManager = CharacterDbManager()
-        #self.filterManager = FilterManager()
-        #self.commonClasses = CommonClasses()
-        #self.pageManager = PageManager()
-        #self.fileManager = FileManager()
-        #self.downloadManager = DownloadManager()
 
     # ?minor function
 
@@ -83,23 +71,20 @@ class Downloader(object):
         self.MAINURL = "https://yande.re/"
         self.sav_dir = settings.read_settings()
         self.pageCounter = 1
-
-
-
         self.initialize_managers()
-        self.character.url = self.pageManager.set_character_url(self.pageCounter, self.character.name)
+
         # check if directory exists, if not create one.
         self.fileManager.checkCharacterDir()
         self.folder_path = self.fileManager.get_folder_path()
         self.file_count = self.fileManager.get_current_file_count()
         self.stop_amount = self.character.amount + self.file_count
-        while self.file_count <= self.stop_amount:
+        while self.file_count < self.stop_amount:
+            self.character.url = self.pageManager.set_character_url(self.pageCounter, self.character.name)
             thumb_nails = self.pageManager.getPage_thumbnails(self.character.url)
             self.downloadManager.download_pictures(self.file_count, self.stop_amount, self.folder_path)
             self.file_count = self.fileManager.get_current_file_count()
             self.pageCounter += 1
-            self.character.url = self.pageManager.set_character_url(self.pageCounter, self.character.name)
-        self.dbManager.update_database()
+        self.dbManager.update_database(self.character.name, self.file_count)
         self.dbManager.update_collection()
 
     def initialize_managers(self):

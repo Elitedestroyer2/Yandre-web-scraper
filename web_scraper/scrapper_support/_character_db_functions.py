@@ -3,12 +3,12 @@ from settings import settings
 import os
 
 
-def update_database(self):
+def update_database(self, character_name, file_count):
     self.create_connection()
-    amount = self.get_current_file_count() - 1
-    character_name = self.character.name
+    amount = file_count - 1
+    character_name = character_name
     character_name = character_name.replace('_', ' ')
-    self.add_character(character_name, amount)
+    self.update_character_amount([character_name, amount])
     self.close_connection()
 
 
@@ -73,12 +73,12 @@ def update_collection(self):
     self.delete_table()
     self.create_table()
     for folder in list_folders:
-        folder_path = self.get_folder_path(self.sav_dir, folder)
+        folder_path = get_folder_path(self.sav_dir, folder)
         amount_of_pics_in_folder = len(next(os.walk(folder_path))[2])
-        self.add_character(folder, amount_of_pics_in_folder)
+        self.update_character_amount([folder, amount_of_pics_in_folder])
     self.close_connection()
 
 # ? minor function?
-def get_folder_path(self, sav_dir, folder):
+def get_folder_path(sav_dir, folder):
     folder_path = sav_dir + '/' + folder
     return folder_path
